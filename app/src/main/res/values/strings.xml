@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">CameraMovements</string>
+    <string name="main_activity_title">Camera Movement</string>
+    <string name="main_activity_start_button">Start recording</string>
+    <string name="settings">Settings</string>
 </resources>
