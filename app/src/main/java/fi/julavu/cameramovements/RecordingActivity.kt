@@ -19,6 +19,12 @@ class RecordingActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_recording)
 
+        val settingsButton = findViewById<Button>(R.id.recording_activity_settings_button)
+        settingsButton.setOnClickListener {
+            val intent = Intent(this, SettingsActivity::class.java)
+            startActivity(intent)
+        }
+
         val backButton = findViewById<Button>(R.id.recording_activity_back_button)
         backButton.setOnClickListener {
             val intent = Intent(this,MainActivity::class.java)

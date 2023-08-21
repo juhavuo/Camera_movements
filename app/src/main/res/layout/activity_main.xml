@@ -35,16 +35,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/main_activity_settings_button"
-        android:text="@string/settings"
-        style="@style/colored_buttons"
-        app:layout_constraintTop_toBottomOf="@id/main_activity_start_recording_button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
+
 
 
 

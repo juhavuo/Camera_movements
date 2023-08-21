@@ -25,11 +25,6 @@ class MainActivity : ComponentActivity() {
             startActivity(intent)
         }
 
-        val settingsButton = findViewById<Button>(R.id.main_activity_settings_button)
-        settingsButton.setOnClickListener {
-            val intent = Intent(this, SettingsActivity::class.java)
-            startActivity(intent)
-        }
     }
 
 

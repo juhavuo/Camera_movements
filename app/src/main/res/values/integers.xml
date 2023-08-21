@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="timespan_min">10</integer>
+    <integer name="timespan_max">120</integer>
+    <integer name="timespan_initial_value">30</integer>
+</resources>

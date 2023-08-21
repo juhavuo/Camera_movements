@@ -25,7 +25,9 @@
         android:padding="50dp"
         android:layout_marginVertical="24dp"
         android:layout_marginHorizontal="30dp"
+        android:maxWidth="320dp"
         app:layout_constraintTop_toBottomOf="@id/recording_activity_title_text_view"
+        app:layout_constraintBottom_toTopOf="@id/recording_activity_settings_button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
@@ -35,7 +37,18 @@
         android:id="@+id/recording_activity_back_button"
         android:text="@string/back_button"
         android:layout_marginBottom="24dp"
-        android:layout_marginEnd="24dp"
+        android:layout_marginStart="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/recording_activity_settings_button"
+        android:text="@string/settings"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
 </androidx.constraintlayout.widget.ConstraintLayout>
