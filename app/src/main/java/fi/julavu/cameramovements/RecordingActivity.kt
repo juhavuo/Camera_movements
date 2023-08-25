@@ -13,12 +13,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import fi.julavu.cameramovements.ui.theme.CameraMovementsTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class RecordingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_recording)
 
+        val cameraHandler = CameraHandler(this)
+
+        val startButton = findViewById<Button>(R.id.recording_activity_start_button)
+        startButton.setOnClickListener {
+        }
         val settingsButton = findViewById<Button>(R.id.recording_activity_settings_button)
         settingsButton.setOnClickListener {
             val intent = Intent(this, SettingsActivity::class.java)

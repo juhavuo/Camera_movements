@@ -22,6 +22,7 @@ class DataStoreHandler(val context: Context) {
     private val dataStore = context.dataStore
 
     suspend fun getTimespanValue() : Int{
+        /*
         val defaultValue = context.resources.getInteger(R.integer.timespan_initial_value)
         val preferences_value = intPreferencesKey(timespan_tag)
         val timespanValueFlow: Flow<Int> = dataStore.data.map {
@@ -32,7 +33,8 @@ class DataStoreHandler(val context: Context) {
             return defaultValue
         }else{
             return valueFromPreferences
-        }
+        }*/
+        return 0
     }
 
     suspend fun writeTimespanValue(newTimespanValue: Int){

@@ -1,6 +1,5 @@
-
-
 package fi.julavu.cameramovements
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -8,14 +7,26 @@ import android.widget.Button
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.activity.ComponentActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+
 class SettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
+
+        val settingsDataList = getSettingsDataList()
+
+        val settingsRecyclerView = findViewById<RecyclerView>(R.id.settings_activity_recyclerview)
+        val linearLayoutManager = LinearLayoutManager(this)
+        val settingsAdapter = SettingsAdapter(settingsDataList, this)
+
+        settingsRecyclerView.layoutManager = linearLayoutManager
+        settingsRecyclerView.adapter = settingsAdapter
+        /*
         var startValueForSeekbar = 0
         val dataStoreHandler = DataStoreHandler(this)
 
@@ -31,15 +42,16 @@ class SettingsActivity : ComponentActivity() {
         CoroutineScope(Dispatchers.Main).launch {
             startValueForSeekbar = dataStoreHandler.getTimespanValue()
             timespanSeekbar.progress = startValueForSeekbar
-        }
+        }*/
 
         //Log.i("cameramovements_testing","${timespanSeekbar.min}")
 
         val saveButton = findViewById<Button>(R.id.settings_activity_save_and_quit_button)
         saveButton.setOnClickListener {
+            /*
             CoroutineScope(Dispatchers.Main).launch {
                 dataStoreHandler.writeTimespanValue(timespanSeekbar.progress)
-            }
+            }*/
             goBackToRecording()
         }
 
@@ -47,6 +59,16 @@ class SettingsActivity : ComponentActivity() {
         cancelButton.setOnClickListener {
             goBackToRecording()
         }
+    }
+
+    private fun getSettingsDataList(): ArrayList<SettingsData>{
+        val settingsDataList = ArrayList<SettingsData>()
+        val rawSettingsArray = resources.getStringArray(R.array.settings_seekbar_data)
+        for(rawSettings in rawSettingsArray){
+            val parts = rawSettings.split(",")
+            settingsDataList.add(SettingsData(parts[0],parts[1].toInt(),parts[3].toInt(),parts[2].toInt(),parts[4]))
+        }
+        return settingsDataList
     }
 
     private fun goBackToRecording(){
