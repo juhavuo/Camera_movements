@@ -12,7 +12,7 @@ class SettingsActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
-        val settingsDataList = SettingsData.getSettingsDataList(this)
+        val settingsDataList = SettingsData.getDefaultSettingsDataList(this)
 
         val settingsRecyclerView = findViewById<RecyclerView>(R.id.settings_activity_recyclerview)
         val linearLayoutManager = LinearLayoutManager(this)

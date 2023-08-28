@@ -23,6 +23,7 @@ class RecordingActivity : ComponentActivity() {
         setContentView(R.layout.activity_recording)
 
         val cameraHandler = CameraHandler(this)
+        cameraHandler.doPreparation()
 
         val startButton = findViewById<Button>(R.id.recording_activity_start_button)
         startButton.setOnClickListener {

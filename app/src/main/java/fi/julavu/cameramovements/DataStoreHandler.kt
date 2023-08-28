@@ -1,18 +1,12 @@
 package fi.julavu.cameramovements
 
 import android.content.Context
-import android.util.Log
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
-
 //https://stackoverflow.com/questions/66466345/proper-instance-creation-of-androids-jetpack-datastore-alpha07-version
 private val Context.dataStore by preferencesDataStore(name = "settings")
 
@@ -21,6 +15,7 @@ class DataStoreHandler(val context: Context) {
     //private val timespan_tag = "TIMESPAN_VALUE"
     private val dataStore = context.dataStore
 
+    /*
     suspend fun getSeekbarProgressValues(settingsDataList: ArrayList<SettingsData>): ArrayList<Int> {
         val seekbarProgressValues = ArrayList<Int>()
 
@@ -39,7 +34,7 @@ class DataStoreHandler(val context: Context) {
         }
 
         return seekbarProgressValues
-    }
+    }*/
 
     suspend fun getSeekbarProgressValue(settingsData: SettingsData): Int {
 
