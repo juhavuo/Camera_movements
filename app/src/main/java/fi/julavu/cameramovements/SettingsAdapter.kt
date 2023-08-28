@@ -8,10 +8,14 @@ import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-class SettingsAdapter(private var settingsDataList: ArrayList<SettingsData>, val context: Context): RecyclerView.Adapter<SettingsAdapter.SettingsHolder>() {
+class SettingsAdapter(private var settingsDataList: ArrayList<SettingsData>, private val context: Context): RecyclerView.Adapter<SettingsAdapter.SettingsHolder>() {
 
     private var seekbarProgress = 0
+    private val dataStoreHandler = DataStoreHandler(context)
 
     inner class SettingsHolder(v: View): RecyclerView.ViewHolder(v){
         val title = v.findViewById<TextView>(R.id.row_recyclerview_title)
@@ -35,11 +39,14 @@ class SettingsAdapter(private var settingsDataList: ArrayList<SettingsData>, val
         holder.maxValueTextView.text = settingsDataList[position].sliderMax.toString()
         holder.seekBar.min = settingsDataList[position].sliderMin
         holder.seekBar.max = settingsDataList[position].sliderMax
-        seekbarProgress = settingsDataList[position].startValue
+        CoroutineScope(Dispatchers.Main).launch {
+            holder.seekBar.progress = dataStoreHandler.getSeekbarProgressValue(settingsDataList[position])
+        }
         holder.seekBar.progress = seekbarProgress
         holder.seekBar.setOnSeekBarChangeListener(object: OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 seekbarProgress = progress
+                settingsDataList[holder.absoluteAdapterPosition].progress = progress
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
@@ -49,5 +56,9 @@ class SettingsAdapter(private var settingsDataList: ArrayList<SettingsData>, val
         })
     }
 
-    fun getSeekbarProgress(): Int = seekbarProgress
+    fun saveSeekbarProgressesToDataStore(){
+        CoroutineScope(Dispatchers.Main).launch {
+           dataStoreHandler.writeSeekbarProgressValues(settingsDataList)
+        }
+    }
 }

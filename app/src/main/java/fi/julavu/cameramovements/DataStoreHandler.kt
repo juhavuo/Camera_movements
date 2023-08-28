@@ -18,29 +18,59 @@ private val Context.dataStore by preferencesDataStore(name = "settings")
 
 class DataStoreHandler(val context: Context) {
 
-    private val timespan_tag = "TIMESPAN_VALUE"
+    //private val timespan_tag = "TIMESPAN_VALUE"
     private val dataStore = context.dataStore
 
-    suspend fun getTimespanValue() : Int{
-        /*
-        val defaultValue = context.resources.getInteger(R.integer.timespan_initial_value)
-        val preferences_value = intPreferencesKey(timespan_tag)
-        val timespanValueFlow: Flow<Int> = dataStore.data.map {
-            preferences -> preferences[preferences_value] ?: defaultValue
+    suspend fun getSeekbarProgressValues(settingsDataList: ArrayList<SettingsData>): ArrayList<Int> {
+        val seekbarProgressValues = ArrayList<Int>()
+
+        for (settingsData in settingsDataList) {
+            val defaultValue = settingsData.startValue
+            val preferencesValue = intPreferencesKey(settingsData.tag)
+            val preferencesFlow: Flow<Int> = dataStore.data.map { preferences ->
+                preferences[preferencesValue] ?: defaultValue
+            }
+            val valueFromPreferences = preferencesFlow.firstOrNull()
+            if (valueFromPreferences == null) {
+                seekbarProgressValues.add(defaultValue)
+            } else {
+                seekbarProgressValues.add(valueFromPreferences)
+            }
         }
-        val valueFromPreferences = timespanValueFlow.firstOrNull()
-        if(valueFromPreferences == null){
-            return defaultValue
-        }else{
-            return valueFromPreferences
-        }*/
-        return 0
+
+        return seekbarProgressValues
     }
 
+    suspend fun getSeekbarProgressValue(settingsData: SettingsData): Int {
+
+        val defaultValue = settingsData.startValue
+        var seekbarProgressValue = defaultValue
+        val preferencesValue = intPreferencesKey(settingsData.tag)
+        val preferencesFlow: Flow<Int> = dataStore.data.map { preferences ->
+            preferences[preferencesValue] ?: defaultValue
+        }
+        val valueFromPreferences = preferencesFlow.firstOrNull()
+        if (valueFromPreferences != null) {
+            seekbarProgressValue = valueFromPreferences
+        }
+        return seekbarProgressValue
+    }
+
+
+    /*
     suspend fun writeTimespanValue(newTimespanValue: Int){
         val preferences_value = intPreferencesKey(timespan_tag)
         dataStore.edit {
             settings -> settings[preferences_value] = newTimespanValue
+        }
+    }*/
+
+    suspend fun writeSeekbarProgressValues(settingsDataList: ArrayList<SettingsData>){
+        for(settingsData in settingsDataList){
+            val preferences_value = intPreferencesKey(settingsData.tag)
+            dataStore.edit {
+                settings -> settings[preferences_value] = settingsData.progress
+            }
         }
     }
 
