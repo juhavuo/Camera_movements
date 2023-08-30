@@ -11,6 +11,9 @@
     <string name="title_activity_recording">RecordingActivity</string>
     <string name="recording_activity_title">Record</string>
     <string name="recording_activity_start">Start</string>
+    <string name="notification_channel_title">Camera Movements</string>
+    <string name="notification_channel_name">CameraMovementsChannel</string>
+    <string name="notification_channel_description">For use of camera</string>
     <string-array name="settings_seekbar_data">
         <item>Duration,10,30,120,duration</item>
         <item>Frames,5,30,60,frames</item>
