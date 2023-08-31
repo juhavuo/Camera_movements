@@ -1,15 +1,10 @@
 package fi.julavu.cameramovements
 
-import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.SurfaceTexture
+import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraManager
 import android.media.MediaRecorder
 import android.util.Log
-import android.view.TextureView
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.io.File
 
 //https://www.freecodecamp.org/news/android-camera2-api-take-photos-and-videos/
 //->problem uses mediaRecorder,that requires api 31
@@ -20,8 +15,9 @@ class CameraHandler(private val context: Context) {
     private var fileHandler = FileHandler(context)
     private var videoLength = 0
     private var framerate = 0
+    private var cameraId = -1
 
-    suspend fun doPreparation() {
+    suspend fun fetchSettingsData() {
         val videoLengthSettingsData = settingsDataList.first { it.tag == "duration" }
         videoLength = dataStoreHandler.getSeekbarProgressValue(videoLengthSettingsData)
         val framerateSettingsData = settingsDataList.first { it.tag == "frames" }
@@ -50,7 +46,18 @@ class CameraHandler(private val context: Context) {
 
     }
 
-    fun record() {}
+    fun prepareCamera(){
+        val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        val cameraIds : Array<String> = cameraManager.cameraIdList
+        var camId= ""
+        for(cameraId in cameraIds){
+            val cameraCharasteristics = cameraManager.getCameraCharacteristics(cameraId)
+            if(cameraCharasteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_BACK){
+                camId = cameraId
+            }
+        }
+        Log.i(MyApplication.tagForTesting,camId)
+    }
 
 
 }

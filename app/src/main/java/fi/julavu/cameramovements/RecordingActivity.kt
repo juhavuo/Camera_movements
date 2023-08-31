@@ -1,5 +1,6 @@
 package fi.julavu.cameramovements
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -7,28 +8,18 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import fi.julavu.cameramovements.ui.theme.CameraMovementsTheme
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class RecordingActivity : ComponentActivity() {
-
-
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_recording)
 
         createNotificationChannel()
+
+        val permissionHelper = PermissionHelper()
+        val permissions = arrayOf(Manifest.permission.CAMERA)
+        permissionHelper.checkAndRequestPermissions(this,permissions)
 
         val serviceClass = CameraService::class.java
         val serviceIntent = Intent(applicationContext,serviceClass)

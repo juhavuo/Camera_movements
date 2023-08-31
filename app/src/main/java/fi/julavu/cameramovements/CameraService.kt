@@ -29,9 +29,12 @@ class CameraService: Service() {
         cameraHandler = CameraHandler(this)
         isServiceStarted = true
         CoroutineScope(Dispatchers.Main).launch {
-            cameraHandler.doPreparation()
+            cameraHandler.fetchSettingsData()
+            cameraHandler.prepareCamera()
+            stopSelf()
+            /*
             cameraHandler.setupMediaRecorder(360,480)
-            useTimer()
+            useTimer()*/
         }
         return START_STICKY //IS THIS BEST OPTION, NEED TO REVISIT THIS
     }
