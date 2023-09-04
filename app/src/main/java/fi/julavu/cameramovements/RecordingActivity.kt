@@ -10,7 +10,7 @@ import android.widget.Button
 import androidx.activity.ComponentActivity
 
 class RecordingActivity : ComponentActivity() {
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_recording)
