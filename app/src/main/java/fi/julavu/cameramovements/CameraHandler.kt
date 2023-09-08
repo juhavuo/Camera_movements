@@ -1,12 +1,14 @@
 package fi.julavu.cameramovements
 
 import android.content.Context
+import android.graphics.ImageFormat
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.media.ImageReader
 import android.media.MediaRecorder
 import android.util.Log
+import android.util.Size
 
 //https://www.freecodecamp.org/news/android-camera2-api-take-photos-and-videos/
 //->problem uses mediaRecorder,that requires api 31
@@ -16,6 +18,7 @@ class CameraHandler(private val context: Context) {
     private var settingsDataList = SettingsData.getDefaultSettingsDataList(context)
     private lateinit var imageReader: ImageReader
     private var fileHandler = FileHandler(context)
+    private var outputSize = Size(720,480) //default
     private lateinit var mediaRecorder: MediaRecorder
     private var videoLength = 0
     private var framerate = 0
@@ -29,7 +32,7 @@ class CameraHandler(private val context: Context) {
         Log.i("cameramovements_testing", "videolengt: $videoLength, framerate: $framerate")
 
     }
-
+    /*
     fun setupMediaRecorder(width: Int, height: Int) {
 
         mediaRecorder = if (android.os.Build.VERSION.SDK_INT < 31) {
@@ -48,7 +51,7 @@ class CameraHandler(private val context: Context) {
 
         Log.i("cameramovements_testing", "${mediaRecorder.metrics}")
 
-    }
+    }*/
 
     fun prepareCamera(){
         val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
@@ -64,11 +67,13 @@ class CameraHandler(private val context: Context) {
                         Log.i(MyApplication.tagForTesting,"outgput: $outputFormat")
                     }
                 }
-                val sizes = streamMap?.getOutputSizes(SurfaceTexture::class.java)
+
+                val sizes = streamMap?.getOutputSizes(ImageFormat.JPEG)
                 if (sizes != null) {
                     Log.i(MyApplication.tagForTesting,"sizes class: ${sizes::class.java}")
                     for(size in sizes){
-                        Log.i(MyApplication.tagForTesting,"size: $size")
+                        Log.i(MyApplication.tagForTesting,"size: $size, ratio: ${size.width.toDouble()/size.height}")
+
                     }
                 }
             }
