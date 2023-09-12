@@ -53,6 +53,21 @@ class CameraHandler(private val context: Context) {
 
     }*/
 
+    companion object {
+        fun getSizes(context: Context): ArrayList<Size>{
+            val sizes = ArrayList<Size>()
+            val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+            val camIds = cameraManager.cameraIdList
+            val cameraCharacteristics = cameraManager.getCameraCharacteristics(camIds[0])
+            val streamMap = cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+            if(streamMap != null) {
+                val sizeArray = streamMap.getOutputSizes(ImageFormat.JPEG)
+                sizes.addAll(sizeArray)
+            }
+            return sizes
+        }
+    }
+
     fun prepareCamera(){
         val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         val camIds : Array<String> = cameraManager.cameraIdList

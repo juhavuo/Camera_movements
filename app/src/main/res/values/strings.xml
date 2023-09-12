@@ -4,6 +4,9 @@
     <string name="main_activity_start_button">Start recording</string>
     <string name="settings">Settings</string>
     <string name="back_button">Back</string>
+    <string name="settings_image_size">Image_size</string>
+    <string name="settings_duration">Duration</string>
+    <string name="settings_frames">Frames</string>
     <string name="settings_activity_save_and_exit">Save and exit</string>
     <string name="settings_activity_cancel">Cancel</string>
     <string name="title_activity_settings">SettingsActivity</string>
@@ -14,6 +17,7 @@
     <string name="notification_channel_title">Camera Movements</string>
     <string name="notification_channel_name">CameraMovementsChannel</string>
     <string name="notification_channel_description">For use of camera</string>
+    <string name="for_duration_seekbar">Duration,10,30,120,duration</string>
     <string-array name="settings_seekbar_data">
         <item>Duration,10,30,120,duration</item>
         <item>Frames,5,30,60,frames</item>
