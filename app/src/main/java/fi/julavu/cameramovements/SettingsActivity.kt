@@ -21,6 +21,7 @@ class SettingsActivity : ComponentActivity() {
 
     private lateinit var dataStoreHandler: DataStoreHandler
     private lateinit var durationSeekBar: SeekBar
+    private lateinit var sizesSpinner: Spinner
     private val settingsDataList = ArrayList<SettingsData>()
     private val seekBars = ArrayList<SeekBar>()
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,8 +34,12 @@ class SettingsActivity : ComponentActivity() {
         for(size in sizes){
             sizesListedForSpinner.add(size.toString())
         }
+        var defaultSize = sizes.size/2
+        if(sizes.size == 1){
+            defaultSize = 0
+        }
 
-        val sizesSpinner = findViewById<Spinner>(R.id.settings_activity_size_spinner)
+        sizesSpinner = findViewById<Spinner>(R.id.settings_activity_size_spinner)
         val sizesSpinnerAdapter = ArrayAdapter(this,android.R.layout.simple_spinner_item,sizesListedForSpinner)
         sizesSpinner.adapter = sizesSpinnerAdapter
 
@@ -44,6 +49,12 @@ class SettingsActivity : ComponentActivity() {
           for(i in 0 until seekBars.size){
               settingsDataList[i].progress = dataStoreHandler.getSeekbarProgressValue(settingsDataList[i])
               seekBars[i].progress = settingsDataList[i].progress
+              val sizeIndex = dataStoreHandler.getImageSizeIndex()
+              if(sizeIndex>=0) {
+                  sizesSpinner.setSelection(sizeIndex)
+              }else{
+                  sizesSpinner.setSelection(defaultSize)
+              }
           }
         }
         for(i in 0 until seekBars.size){
@@ -131,7 +142,10 @@ class SettingsActivity : ComponentActivity() {
     private fun saveAllSettings(){
         CoroutineScope(Dispatchers.Main).launch {
             dataStoreHandler.writeSeekbarProgressValues(settingsDataList)
+            dataStoreHandler.writeImageSize(sizesSpinner.selectedItemPosition)
         }
     }
+
+
 }
 

@@ -15,20 +15,21 @@ import android.util.Size
 //https://androidwave.com/video-recording-with-camera2-api-android/
 class CameraHandler(private val context: Context) {
     private var dataStoreHandler: DataStoreHandler = DataStoreHandler(context)
-    private var settingsDataList = SettingsData.getDefaultSettingsDataList(context)
+    //private var settingsDataList = SettingsData.getDefaultSettingsDataList(context)
     private lateinit var imageReader: ImageReader
     private var fileHandler = FileHandler(context)
-    private var outputSize = Size(720,480) //default
+    private var outputSize = Size(720,480)
     private lateinit var mediaRecorder: MediaRecorder
+    private var sizeIndex = -1
     private var videoLength = 0
     private var framerate = 0
     private var cameraId = ""
 
     suspend fun fetchSettingsData() {
-        val videoLengthSettingsData = settingsDataList.first { it.tag == "duration" }
+        val videoLengthSettingsData = SettingsData.getSettingsData(context,R.string.for_duration_seekbar)
         videoLength = dataStoreHandler.getSeekbarProgressValue(videoLengthSettingsData)
-        val framerateSettingsData = settingsDataList.first { it.tag == "frames" }
-        framerate = dataStoreHandler.getSeekbarProgressValue(framerateSettingsData)
+        sizeIndex = dataStoreHandler.getImageSizeIndex()
+
         Log.i("cameramovements_testing", "videolengt: $videoLength, framerate: $framerate")
 
     }
@@ -76,21 +77,27 @@ class CameraHandler(private val context: Context) {
             if(cameraCharasteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_BACK){
                cameraId = camId
                 val streamMap = cameraCharasteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
-                val outputFormats = streamMap?.outputFormats
-                if(outputFormats!=null){
-                    for(outputFormat in outputFormats){
-                        Log.i(MyApplication.tagForTesting,"outgput: $outputFormat")
+                val sizes = streamMap?.getOutputSizes(ImageFormat.JPEG)
+                if(sizes != null) {
+                    if (sizeIndex >= 0) {
+                        outputSize = sizes[sizeIndex]
+                    }else{
+                        if(sizes.size > 1){
+                            outputSize = sizes[sizes.size/2]
+                        }else{
+                            outputSize = sizes[0]
+                        }
                     }
                 }
-
-                val sizes = streamMap?.getOutputSizes(ImageFormat.JPEG)
+                Log.i(MyApplication.tagForTesting,"$outputSize")
+                /*
                 if (sizes != null) {
                     Log.i(MyApplication.tagForTesting,"sizes class: ${sizes::class.java}")
                     for(size in sizes){
                         Log.i(MyApplication.tagForTesting,"size: $size, ratio: ${size.width.toDouble()/size.height}")
 
                     }
-                }
+                }*/
             }
         }
         Log.i(MyApplication.tagForTesting,cameraId)

@@ -14,6 +14,7 @@ class DataStoreHandler(val context: Context) {
 
     //private val timespan_tag = "TIMESPAN_VALUE"
     private val dataStore = context.dataStore
+    private val sizeTag = "image_size"
 
     /*
     suspend fun getSeekbarProgressValues(settingsDataList: ArrayList<SettingsData>): ArrayList<Int> {
@@ -51,6 +52,14 @@ class DataStoreHandler(val context: Context) {
         return seekbarProgressValue
     }
 
+    suspend fun getImageSizeIndex(): Int {
+        val defaultValue = -1
+        val preferencesValue = intPreferencesKey(sizeTag)
+        val preferencesFlow: Flow<Int> = dataStore.data.map { preferences ->
+            preferences[preferencesValue] ?: defaultValue
+        }
+        return preferencesFlow.firstOrNull() ?: defaultValue
+    }
 
     /*
     suspend fun writeTimespanValue(newTimespanValue: Int){
@@ -62,10 +71,17 @@ class DataStoreHandler(val context: Context) {
 
     suspend fun writeSeekbarProgressValues(settingsDataList: ArrayList<SettingsData>){
         for(settingsData in settingsDataList){
-            val preferences_value = intPreferencesKey(settingsData.tag)
+            val preferencesValue = intPreferencesKey(settingsData.tag)
             dataStore.edit {
-                settings -> settings[preferences_value] = settingsData.progress
+                settings -> settings[preferencesValue] = settingsData.progress
             }
+        }
+    }
+
+    suspend fun writeImageSize(sizeIndex: Int){
+        val preferencesValue = intPreferencesKey(sizeTag)
+        dataStore.edit {
+            settings -> settings[preferencesValue] = sizeIndex
         }
     }
 
