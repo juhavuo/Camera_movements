@@ -31,7 +31,7 @@ class CameraService: Service() {
         CoroutineScope(Dispatchers.Main).launch {
             cameraHandler.fetchSettingsData()
             cameraHandler.prepareCamera()
-            stopSelf()
+            //stopSelf()
             /*
             cameraHandler.setupMediaRecorder(360,480)
             useTimer()*/

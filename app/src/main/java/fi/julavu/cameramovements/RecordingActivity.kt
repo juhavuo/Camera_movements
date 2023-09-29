@@ -16,10 +16,7 @@ class RecordingActivity : ComponentActivity() {
         setContentView(R.layout.activity_recording)
 
         createNotificationChannel()
-
-        val permissionHelper = PermissionHelper()
-        val permissions = arrayOf(Manifest.permission.CAMERA)
-        permissionHelper.checkAndRequestPermissions(this,permissions)
+        checkPermissions()
 
         val serviceClass = CameraService::class.java
         val serviceIntent = Intent(applicationContext,serviceClass)
@@ -32,6 +29,12 @@ class RecordingActivity : ComponentActivity() {
         settingsButton.setOnClickListener {
             val intent = Intent(this, SettingsActivity::class.java)
             startActivity(intent)
+        }
+
+        //to enable testing
+        val stopButton = findViewById<Button>(R.id.recording_activity_stop_button_for_testing)
+        stopButton.setOnClickListener {
+            stopService(serviceIntent)
         }
 
         val backButton = findViewById<Button>(R.id.recording_activity_back_button)
@@ -55,6 +58,12 @@ class RecordingActivity : ComponentActivity() {
         notificationChannel.description = notificationDescription
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(notificationChannel)
+    }
+
+    private fun checkPermissions(){
+        val permissionHelper = PermissionHelper()
+        val permissions = arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        permissionHelper.checkAndRequestPermissions(this,permissions)
     }
 }
 
