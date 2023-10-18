@@ -1,10 +1,8 @@
 package fi.julavu.cameramovements
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.ImageFormat
-import android.graphics.SurfaceTexture
 import android.hardware.camera2.CameraCaptureSession
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraDevice
@@ -12,7 +10,6 @@ import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CaptureRequest
 import android.hardware.camera2.TotalCaptureResult
 import android.hardware.camera2.params.OutputConfiguration
-import android.hardware.camera2.params.SessionConfiguration
 import android.media.ImageReader
 import android.media.MediaRecorder
 import android.os.Handler
@@ -36,6 +33,7 @@ class CameraHandler(private val context: Context) {
     private lateinit var imageReader: ImageReader
     private lateinit var imageReaderSurface: Surface
     private lateinit var fileHandler: FileHandler
+    private lateinit var imageManipulator: ImageManipulator
     private var outputSize = Size(720, 480)
     private lateinit var mediaRecorder: MediaRecorder
     private lateinit var cameraDevice: CameraDevice
@@ -101,6 +99,7 @@ class CameraHandler(private val context: Context) {
     fun prepareCamera() {
         startBackgroundThread()
         fileHandler = FileHandler(context, handler)
+        fileHandler.createFolderForTemporaryPhotos() //creates folder if it doesn't exist
         cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         val camIds: Array<String> = cameraManager.cameraIdList
         for (camId in camIds) {
@@ -137,9 +136,11 @@ class CameraHandler(private val context: Context) {
 
         imageReader.setOnImageAvailableListener({
             val image = it.acquireLatestImage()
-            Log.i(MyApplication.tagForTesting, "Time to save image $image")
-            //stopUsingCamera()
-            image.close()
+            handler.post {
+                Log.i(MyApplication.tagForTesting, "Time to save image $image")
+                fileHandler.saveImageToTemporaryStorage(image)
+                image.close()
+            }
         }, handler)
 
 
@@ -182,6 +183,7 @@ class CameraHandler(private val context: Context) {
                     closeCamera()
                     stopBackgroundThread()
                     timeToStop = false
+                    startImageManipulator()
                     Log.i(MyApplication.tagForTesting, "on Ready finished")
                 }
             }
@@ -219,5 +221,10 @@ class CameraHandler(private val context: Context) {
         handlerThread.quitSafely()
         handlerThread.join()
     }
+
+    private fun startImageManipulator(){
+        imageManipulator = ImageManipulator(context)
+    }
+
 
 }
