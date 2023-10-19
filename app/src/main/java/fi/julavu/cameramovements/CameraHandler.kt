@@ -35,7 +35,6 @@ class CameraHandler(private val context: Context) {
     private lateinit var fileHandler: FileHandler
     private lateinit var imageManipulator: ImageManipulator
     private var outputSize = Size(720, 480)
-    private lateinit var mediaRecorder: MediaRecorder
     private lateinit var cameraDevice: CameraDevice
     private var cameraStateCallback: CameraDevice.StateCallback =
         object : CameraDevice.StateCallback() {

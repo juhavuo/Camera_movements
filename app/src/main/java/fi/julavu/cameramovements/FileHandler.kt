@@ -7,10 +7,10 @@ import android.media.Image
 import android.os.Environment
 import android.os.Handler
 import android.util.Log
-import androidx.compose.runtime.LaunchedEffect
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.nio.file.Files
 
 class FileHandler(val context: Context, val handler: Handler) {
 
@@ -40,14 +40,33 @@ class FileHandler(val context: Context, val handler: Handler) {
         val folderForTemporaryPhotos = context.getDir(nameOfInternalFolder,Context.MODE_PRIVATE)
     }*/
 
-    /*
     fun getAmountOfFilesInTemporaryPhotos(): Int{
         val files = getTemporaryPhotoFiles()
         return files?.size ?: 0
-    }*/
+    }
 
     fun getFileForImage(): File {
         return File(context.getExternalFilesDir(usedDirectory), albumNameForVideos)
+    }
+
+    private fun saveImageToFolder(bitmap: Bitmap, fileToSave: File): Boolean{
+        var isSaved = false
+        var fileOutputStream: FileOutputStream? = null
+
+        //Log.i(MyApplication.tagForTesting,"bytebuffer: size ${byteBuffer.capacity()}")
+        //Log.i(MyApplication.tagForTesting,"bitmap: ${bitmap.width} ${bitmap.height}")
+        try{
+            fileOutputStream = FileOutputStream(fileToSave)
+            Log.i(MyApplication.tagForTesting,"fileoutputstream: $fileOutputStream")
+            bitmap.compress(Bitmap.CompressFormat.JPEG,80,fileOutputStream)
+            isSaved = true
+        }catch (ioException: IOException){
+            Log.e(MyApplication.tagForTesting,ioException.toString())
+        }finally {
+            fileOutputStream?.close()
+        }
+
+        return isSaved
     }
 
     fun saveImageToTemporaryStorage(image: Image){
@@ -55,6 +74,13 @@ class FileHandler(val context: Context, val handler: Handler) {
             val file = File(folderForTemporaryPhotos,"$fileNameStart$fileNumber$fileType")
             Log.i(MyApplication.tagForTesting,"name: ${file.name} path: ${file.path}")
             //https://stackoverflow.com/questions/41775968/how-to-convert-android-media-image-to-bitmap-object
+            val byteBuffer = image.planes[0].buffer
+            val bytes = ByteArray(byteBuffer.capacity())
+            byteBuffer.get(bytes)
+            Log.i(MyApplication.tagForTesting, "bytes size: $bytes")
+            val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, null)
+            val isSaved = saveImageToFolder(bitmap,file)
+        /*
             var fileOutputStream: FileOutputStream? = null
             val byteBuffer = image.planes[0].buffer
             //Log.i(MyApplication.tagForTesting,"bytebuffer: size ${byteBuffer.capacity()}")
@@ -71,9 +97,10 @@ class FileHandler(val context: Context, val handler: Handler) {
                 Log.e(MyApplication.tagForTesting,ioException.toString())
             }finally {
                 fileOutputStream?.close()
+            }*/
+            if(isSaved) {
+                ++fileNumber
             }
-           ++fileNumber
-
     }
 
     fun deleteImagesFromTemporaryStorage(){
@@ -85,7 +112,17 @@ class FileHandler(val context: Context, val handler: Handler) {
         }
     }
 
-    fun saveEndProductToExternalStorage(){
+    fun saveEndProductToExternalStorage(bitmap: Bitmap): String{
+        val imageName = "image${System.currentTimeMillis()}.jpg"
+        val externalDir = Environment.getExternalStoragePublicDirectory(usedDirectory)
+        val imageFile = File(externalDir,imageName)
+        saveImageToFolder(bitmap,imageFile)
+        return imageName
+    }
 
+    //https://mkyong.com/java/how-to-rename-file-in-java/
+    fun renameSavedFile(fileName: String){
+        val externalPath = Environment.getExternalStoragePublicDirectory(usedDirectory).toPath()
+        Files.move(externalPath,externalPath.resolveSibling("fileName$fileType"))
     }
 }
