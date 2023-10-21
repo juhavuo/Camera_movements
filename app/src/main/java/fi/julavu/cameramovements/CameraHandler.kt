@@ -11,7 +11,6 @@ import android.hardware.camera2.CaptureRequest
 import android.hardware.camera2.TotalCaptureResult
 import android.hardware.camera2.params.OutputConfiguration
 import android.media.ImageReader
-import android.media.MediaRecorder
 import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
@@ -58,7 +57,7 @@ class CameraHandler(private val context: Context) {
 
         }//CameraDevice.StateCallback
     private lateinit var cameraManager: CameraManager
-    private lateinit var cameraCaptureSession: CameraCaptureSession
+    //private lateinit var cameraCaptureSession: CameraCaptureSession
     private lateinit var captureStateCallback: CameraCaptureSession.StateCallback
     private var cameraService: CameraService? = null
 
@@ -97,7 +96,7 @@ class CameraHandler(private val context: Context) {
     @SuppressLint("MissingPermission")
     fun prepareCamera() {
         startBackgroundThread()
-        fileHandler = FileHandler(context, handler)
+        fileHandler = FileHandler(context)
         fileHandler.createFolderForTemporaryPhotos() //creates folder if it doesn't exist
         cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         val camIds: Array<String> = cameraManager.cameraIdList
@@ -198,10 +197,10 @@ class CameraHandler(private val context: Context) {
 
         Log.i(MyApplication.tagForTesting, cameraId)
     }
-
+/*
     fun getCameraService(service: CameraService) {
         cameraService = service
-    }
+    }*/
 
     fun closeCamera(){
         cameraDevice.close()

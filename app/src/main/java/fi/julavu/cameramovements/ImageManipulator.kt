@@ -1,8 +1,15 @@
+/**
+ * Images are loaded from internal storage. The bitmaps are combined to from end product. Algorithm
+ * can be tuned to make some good effect. For now this happens automatically after photos have been
+ * taken. The idea of separate the take of images and image processing is to make sure that image
+ * handling process can not affect the performance of camera.
+ *
+ * Juha Vuokko
+ */
 package fi.julavu.cameramovements
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Handler
 import android.os.HandlerThread
@@ -10,13 +17,13 @@ import android.util.Log
 import androidx.core.graphics.set
 import java.io.File
 
-class ImageManipulator(val context: Context) {
+class ImageManipulator(context: Context) {
 
     private var handler: Handler
     private var handlerThread: HandlerThread = HandlerThread("imagemanipulatiopthread")
     private var fileHandler: FileHandler
     private var amountOfFiles = 0
-    private var fileNumber = 0
+    //private var fileNumber = 0
     private var bitmapBase: Bitmap? = null
     private var files: Array<File>?
 
@@ -25,7 +32,7 @@ class ImageManipulator(val context: Context) {
         handler = Handler(
             handlerThread.looper
         )
-        fileHandler = FileHandler(context, handler)
+        fileHandler = FileHandler(context)
         files = fileHandler.getTemporaryPhotoFiles()
         if(files!=null) {
             amountOfFiles = files!!.size
@@ -36,16 +43,14 @@ class ImageManipulator(val context: Context) {
                 Log.i(MyApplication.tagForTesting,"filename: ${file.name} filesize: ${file.freeSpace}")
             }
         }*/
-        var bitmap: Bitmap? = null
+        var bitmap: Bitmap?
         if(files != null && files!!.isNotEmpty()){
-           bitmap = getBitmap(files!![0])
+           bitmap = fileHandler.getBitmap(files!![0])
             createEmptyBitmap(bitmap)
             addBitmapToBase(bitmap)
-            bitmap = null
             for (i in 1 until files!!.size){
-                bitmap = getBitmap(files!![i])
+                bitmap = fileHandler.getBitmap(files!![i])
                 addBitmapToBase(bitmap)
-                bitmap = null
             }
         }
         if(bitmapBase!=null) {
@@ -54,6 +59,7 @@ class ImageManipulator(val context: Context) {
         fileHandler.deleteImagesFromTemporaryStorage()
         Log.i(MyApplication.tagForTesting, " amount of files: ${fileHandler.getAmountOfFilesInTemporaryPhotos()}")
         stopBackgroundThread()
+        CameraService.stopService()
     }
 
     //https://stackoverflow.com/questions/5663671/creating-an-empty-bitmap-and-drawing-though-canvas-in-android
@@ -66,13 +72,13 @@ class ImageManipulator(val context: Context) {
 
     private fun addBitmapToBase(bm: Bitmap){
         if(bitmapBase != null){
-            var r = 0
-            var g = 0
-            var b = 0
-            var rAdd = 0
-            var gAdd = 0
-            var bAdd = 0
-            var pixel = 0
+            var r: Int
+            var g: Int
+            var b: Int
+            var rAdd: Int
+            var gAdd: Int
+            var bAdd: Int
+            var pixel: Int
             for(x in 0 until bitmapBase!!.width){
                 for(y in 0 until bitmapBase!!.height){
                     pixel = bitmapBase!!.getPixel(x,y)
@@ -84,18 +90,14 @@ class ImageManipulator(val context: Context) {
                     gAdd = Color.green(pixel)/amountOfFiles
                     bAdd = Color.blue(pixel)/amountOfFiles
 
-                    bitmapBase!!.set(x,y,Color.rgb(r+rAdd,g+gAdd,b+bAdd))
+                    bitmapBase!![x, y] = Color.rgb(r+rAdd,g+gAdd,b+bAdd)
                 }
             }
         }
     }
 
-    private fun getBitmap(sourceFile: File): Bitmap = BitmapFactory.decodeFile(sourceFile.path)
-
     private fun stopBackgroundThread() {
         handlerThread.quitSafely()
         handlerThread.join()
     }
-
-
 }

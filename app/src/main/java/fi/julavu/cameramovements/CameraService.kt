@@ -15,7 +15,16 @@ import kotlinx.coroutines.launch
 class CameraService: Service() {
 
     companion object{
+        lateinit var instance: CameraService
         var isServiceStarted = false
+
+        fun stopService(){
+            instance.stopSelf()
+        }
+    }
+
+    init{
+        instance = this
     }
 
     private lateinit var cameraHandler: CameraHandler

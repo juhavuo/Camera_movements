@@ -31,12 +31,6 @@ class RecordingActivity : ComponentActivity() {
             startActivity(intent)
         }
 
-        //to enable testing
-        val stopButton = findViewById<Button>(R.id.recording_activity_stop_button_for_testing)
-        stopButton.setOnClickListener {
-            stopService(serviceIntent)
-        }
-
         val backButton = findViewById<Button>(R.id.recording_activity_back_button)
         backButton.setOnClickListener {
             val intent = Intent(this,MainActivity::class.java)
