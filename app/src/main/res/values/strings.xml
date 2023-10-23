@@ -18,14 +18,7 @@
     <string name="notification_channel_title">Camera Movements</string>
     <string name="notification_channel_name">CameraMovementsChannel</string>
     <string name="notification_channel_description">For use of camera</string>
-    <string name="for_duration_seekbar">Duration,10,30,120,duration</string>
+    <string name="for_amount_of_photos_seekbar">Amount of photos,10,30,120,photos</string>
     <string name="title_activity_image_gallery">ImageGalleryActivity</string>
-    <string-array name="settings_seekbar_data">
-        <item>Duration,10,30,120,duration</item>
-        <item>Frames,5,30,60,frames</item>
-        <item>Color red variation %,-20,0,20,red</item>
-        <item>Color green variation %,-20,0,20,blue</item>
-        <item>Color blue variation %,-20,0,20,green</item>
-    </string-array>
     <string name="gallery_activity_title">Images</string>
 </resources>

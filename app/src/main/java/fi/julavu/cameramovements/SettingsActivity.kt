@@ -1,4 +1,14 @@
+/**
+ * Activity for selecting settings for camera and image manipulation.
+ * SettingsActivity is reached from RecordingActivity. The reason these
+ * are separated is to keep RecordingActivity as simple as possible so
+ * when using camera one does not change settings accidentally.
+ *
+ * Juha Vuokko
+ */
+
 package fi.julavu.cameramovements
+
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ArrayAdapter
@@ -13,11 +23,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-
 class SettingsActivity : ComponentActivity() {
 
     private lateinit var dataStoreHandler: DataStoreHandler
-    private lateinit var durationSeekBar: SeekBar
+    //private lateinit var durationSeekBar: SeekBar
     private lateinit var sizesSpinner: Spinner
     private val settingsDataList = ArrayList<SettingsData>()
     private val seekBars = ArrayList<SeekBar>()
@@ -36,13 +45,17 @@ class SettingsActivity : ComponentActivity() {
             defaultSize = 0
         }
 
-        sizesSpinner = findViewById<Spinner>(R.id.settings_activity_size_spinner)
+        sizesSpinner = findViewById(R.id.settings_activity_size_spinner)
         val sizesSpinnerAdapter = ArrayAdapter(this,android.R.layout.simple_spinner_item,sizesListedForSpinner)
         sizesSpinner.adapter = sizesSpinnerAdapter
 
-        val durationSettings = SettingsData.getSettingsData(this,R.string.for_duration_seekbar)
-        setupSeekbar(R.id.settings_activity_duration_view,durationSettings)
+        val amountOfPhotosSettings = SettingsData.getSettingsData(this,R.string.for_amount_of_photos_seekbar)
+        setupSeekbar(R.id.settings_activity_amount_of_images_view,amountOfPhotosSettings)
         CoroutineScope(Dispatchers.Main).launch {
+
+            //when saved data is changed
+            //dataStoreHandler.clearDatastore()
+
           for(i in 0 until seekBars.size){
               settingsDataList[i].progress = dataStoreHandler.getSeekbarProgressValue(settingsDataList[i])
               seekBars[i].progress = settingsDataList[i].progress
@@ -71,40 +84,6 @@ class SettingsActivity : ComponentActivity() {
             })
         }
 
-        /*
-
-        val durationSettings = SettingsData.getSettingsData(this,R.string.for_duration_seekbar)
-        durationSeekBar = getAndSetupSeekbar(R.id.settings_activity_duration_view,durationSettings)
-        CoroutineScope(Dispatchers.Main).launch {
-            durationSettings.progress = dataStoreHandler.getSeekbarProgressValue(durationSettings)
-            durationSeekBar.progress = durationSettings.progress
-            settingsDataList.add(durationSettings)
-        }
-
-        durationSeekBar.setOnSeekBarChangeListener(object: OnSeekBarChangeListener{
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                settingsDataList[settingsDataList.indexOfFirst { it.tag == "duration" }].progress = progress
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-        })
-        */
-        //val settingsDataList = SettingsData.getDefaultSettingsDataList(this)
-        /*
-        val settingsRecyclerView = findViewById<RecyclerView>(R.id.settings_activity_recyclerview)
-        val linearLayoutManager = LinearLayoutManager(this)
-        val settingsAdapter = SettingsAdapter(settingsDataList, this)
-
-        settingsRecyclerView.layoutManager = linearLayoutManager
-        settingsRecyclerView.adapter = settingsAdapter
-
-        var startValueForSeekbar = 0
-        val dataStoreHandler = DataStoreHandler(this)
-
-*/
-
         val saveButton = findViewById<Button>(R.id.settings_activity_save_and_quit_button)
         saveButton.setOnClickListener {
             saveAllSettings()
@@ -117,6 +96,11 @@ class SettingsActivity : ComponentActivity() {
         }
     }
 
+    /*
+     *  Setting up seekbar. Get all data what is needed for seekbar.
+     * Using include-tag in actitity_settings.xml forces to do more
+     * setting up in activity. Seekbars are stored in arraylist.
+     */
     private fun setupSeekbar(id: Int, settingsData: SettingsData){
 
         val seekBarLayout = findViewById<RelativeLayout>(id)
@@ -136,6 +120,9 @@ class SettingsActivity : ComponentActivity() {
         startActivity(intent)
     }
 
+    /*
+        If save settings is pressed, all the current values are saved to dataStore.
+     */
     private fun saveAllSettings(){
         CoroutineScope(Dispatchers.Main).launch {
             dataStoreHandler.writeSeekbarProgressValues(settingsDataList)

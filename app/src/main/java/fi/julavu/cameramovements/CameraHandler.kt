@@ -90,18 +90,18 @@ class CameraHandler(private val context: Context) {
     //private lateinit var cameraCaptureSession: CameraCaptureSession
     //private var cameraService: CameraService? = null
     private var sizeIndex = -1
-    private var videoLength = 0
+    //private var videoLength = 0
     private var framerate = 0
     private var cameraId = ""
 
 
     suspend fun fetchSettingsData() {
         val videoLengthSettingsData =
-            SettingsData.getSettingsData(context, R.string.for_duration_seekbar)
-        videoLength = dataStoreHandler.getSeekbarProgressValue(videoLengthSettingsData)
+            SettingsData.getSettingsData(context, R.string.for_amount_of_photos_seekbar)
+        amountOfCaptures = dataStoreHandler.getSeekbarProgressValue(videoLengthSettingsData)
         sizeIndex = dataStoreHandler.getImageSizeIndex()
 
-        Log.i("cameramovements_testing", "videolengt: $videoLength, framerate: $framerate")
+        Log.i("cameramovements_testing", "amountOfCaptures: $amountOfCaptures, framerate: $framerate")
     }
 
     companion object {

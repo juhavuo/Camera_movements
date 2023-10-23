@@ -4,6 +4,9 @@
  * taken. The idea of separate the take of images and image processing is to make sure that image
  * handling process can not affect the performance of camera.
  *
+ * NEEDS SOME KIND OF THREAD HANDLING, NOW EVERYTHING IS DONE IN COROUTINE!!!
+ * IS THAT ENOUGH
+ *
  * Juha Vuokko
  */
 package fi.julavu.cameramovements
@@ -19,8 +22,8 @@ import java.io.File
 
 class ImageManipulator(context: Context) {
 
-    private var handler: Handler
-    private var handlerThread: HandlerThread = HandlerThread("imagemanipulatiopthread")
+    //private var handler: Handler
+    //private var handlerThread: HandlerThread = HandlerThread("imagemanipulatiopthread")
     private var fileHandler: FileHandler
     private var amountOfFiles = 0
     //private var fileNumber = 0
@@ -28,10 +31,11 @@ class ImageManipulator(context: Context) {
     private var files: Array<File>? = null
 
     init {
+        /*
         handlerThread.start()
         handler = Handler(
             handlerThread.looper
-        )
+        )*/
         fileHandler = FileHandler(context)
             files = fileHandler.getTemporaryPhotoFiles()
             if (files != null) {
@@ -61,7 +65,7 @@ class ImageManipulator(context: Context) {
                 MyApplication.tagForTesting,
                 " amount of files: ${fileHandler.getAmountOfFilesInTemporaryPhotos()}"
             )
-            stopBackgroundThread()
+            //stopBackgroundThread()
             CameraService.stopService()
 
     }
@@ -100,8 +104,9 @@ class ImageManipulator(context: Context) {
         }
     }
 
+    /*
     private fun stopBackgroundThread() {
         handlerThread.quitSafely()
         handlerThread.join()
-    }
+    }*/
 }

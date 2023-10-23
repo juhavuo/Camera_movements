@@ -8,20 +8,6 @@ import android.content.Context
 class SettingsData(val title: String, val sliderMin: Int, val sliderMax: Int, val startValue: Int, val tag: String, var progress: Int){
 
     companion object{
-        /*
-            Get default values, no checking from dataStore to find actual values of parameters(= default startValue & progress)
-            These values are stored in strings.xml in settings_seekbar_data. This way one can get needed tags and seekbar basic values
-            and don't need to use coroutine and datastore unless it is really needed.
-         */
-        fun getDefaultSettingsDataList(context: Context): ArrayList<SettingsData>{
-            val settingsDataList = ArrayList<SettingsData>()
-            val rawSettingsArray = context.resources.getStringArray(R.array.settings_seekbar_data)
-            for(rawSettings in rawSettingsArray){
-                val parts = rawSettings.split(",")
-                settingsDataList.add(SettingsData(parts[0],parts[1].toInt(),parts[3].toInt(),parts[2].toInt(),parts[4],parts[2].toInt()))
-            }
-            return settingsDataList
-        }
 
         fun getSettingsData(context: Context, stringId: Int): SettingsData{
             val settingsString = context.resources.getString(stringId)
