@@ -5,7 +5,6 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.os.Build
-import android.os.CountDownTimer
 import android.os.IBinder
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
@@ -39,11 +38,8 @@ class CameraService: Service() {
         isServiceStarted = true
         CoroutineScope(Dispatchers.Main).launch {
             cameraHandler.fetchSettingsData()
-            cameraHandler.prepareCamera()
-            //stopSelf()
-            /*
-            cameraHandler.setupMediaRecorder(360,480)
-            useTimer()*/
+            cameraHandler.useCamera()
+
         }
         return START_STICKY //IS THIS BEST OPTION, NEED TO REVISIT THIS
     }
@@ -55,20 +51,6 @@ class CameraService: Service() {
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
-    }
-
-    private fun useTimer(){
-        val timer = object: CountDownTimer(10000,1000){
-            override fun onTick(millisUntilFinished: Long) {
-                Log.i(MyApplication.tagForTesting,"tick")
-            }
-
-            override fun onFinish() {
-                stopSelf()
-            }
-
-        }
-        timer.start()
     }
 
     private fun startServiceForeground(){
@@ -96,7 +78,7 @@ class CameraService: Service() {
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentIntent(pendingIntent)
 
-        var notification = notificationBuilder.build()
+        val notification = notificationBuilder.build()
 
         startForeground(MyApplication.notificationId,notification)
     }

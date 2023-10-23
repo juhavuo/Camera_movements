@@ -1,3 +1,11 @@
+/**
+ * Handling the camera. Uses camera to take series of photos and save them to internal storage.
+ * After this is done, the processing in ImageHandler is started.
+ *
+ * Now there is massive function which basically does everything. That may need to change.
+ * Juha Vuokko
+ */
+
 package fi.julavu.cameramovements
 
 import android.annotation.SuppressLint
@@ -18,7 +26,6 @@ import android.util.Size
 import android.view.Surface
 
 //https://www.freecodecamp.org/news/android-camera2-api-take-photos-and-videos/
-//->problem uses mediaRecorder,that requires api 31
 //https://androidwave.com/video-recording-with-camera2-api-android/
 class CameraHandler(private val context: Context) {
     private var dataStoreHandler: DataStoreHandler = DataStoreHandler(context)
@@ -35,6 +42,8 @@ class CameraHandler(private val context: Context) {
     private lateinit var imageManipulator: ImageManipulator
     private var outputSize = Size(720, 480)
     private lateinit var cameraDevice: CameraDevice
+
+    //this used to define cameraDevice
     private var cameraStateCallback: CameraDevice.StateCallback =
         object : CameraDevice.StateCallback() {
             override fun onOpened(camera: CameraDevice) {
@@ -53,18 +62,38 @@ class CameraHandler(private val context: Context) {
                 cameraDevice.close()
                 Log.i(MyApplication.tagForTesting, "$error")
             }
-
-
         }//CameraDevice.StateCallback
+
+    private val captureCallback = object : CameraCaptureSession.CaptureCallback() {
+        //when one capture is completed one is added to counter
+        //when captureCounter reaches amountOfCaptures request for repeated photos
+        //is stopped and bool timeToStop is set to true so camera and imageRwader can be
+        //closed
+        override fun onCaptureCompleted(
+            session: CameraCaptureSession,
+            request: CaptureRequest,
+            result: TotalCaptureResult
+        ) {
+            Log.i(
+                MyApplication.tagForTesting,
+                "capturecallback oncapturecompleted, number $captureCounter"
+            )
+            ++captureCounter
+            if (captureCounter >= amountOfCaptures) {
+                session.stopRepeating()
+                timeToStop = true
+            }
+        }
+    }
+
     private lateinit var cameraManager: CameraManager
     //private lateinit var cameraCaptureSession: CameraCaptureSession
-    private lateinit var captureStateCallback: CameraCaptureSession.StateCallback
-    private var cameraService: CameraService? = null
-
+    //private var cameraService: CameraService? = null
     private var sizeIndex = -1
     private var videoLength = 0
     private var framerate = 0
     private var cameraId = ""
+
 
     suspend fun fetchSettingsData() {
         val videoLengthSettingsData =
@@ -73,9 +102,7 @@ class CameraHandler(private val context: Context) {
         sizeIndex = dataStoreHandler.getImageSizeIndex()
 
         Log.i("cameramovements_testing", "videolengt: $videoLength, framerate: $framerate")
-
     }
-
 
     companion object {
         fun getSizes(context: Context): ArrayList<Size> {
@@ -94,7 +121,7 @@ class CameraHandler(private val context: Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun prepareCamera() {
+    fun useCamera() {
         startBackgroundThread()
         fileHandler = FileHandler(context)
         fileHandler.createFolderForTemporaryPhotos() //creates folder if it doesn't exist
@@ -146,24 +173,9 @@ class CameraHandler(private val context: Context) {
             cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
         captureRequestBuilder.addTarget(imageReaderSurface)
 
-        val captureCallback = object : CameraCaptureSession.CaptureCallback() {
-            override fun onCaptureCompleted(
-                session: CameraCaptureSession,
-                request: CaptureRequest,
-                result: TotalCaptureResult
-            ) {
-                Log.i(
-                    MyApplication.tagForTesting,
-                    "capturecallback oncapturecompleted, number $captureCounter"
-                )
-                ++captureCounter
-                if(captureCounter>=amountOfCaptures){
-                    session.stopRepeating()
-                    timeToStop = true
-                }
-            }
-        }
-        captureStateCallback = object : CameraCaptureSession.StateCallback() {
+        val captureStateCallback = object : CameraCaptureSession.StateCallback() {
+
+            //when camera is ready, request for taking multiple photos is set
             override fun onConfigured(session: CameraCaptureSession) {
                 session.setRepeatingRequest(
                     captureRequestBuilder.build(),
@@ -171,13 +183,15 @@ class CameraHandler(private val context: Context) {
                     handler
                 )
             }
-            
             override fun onConfigureFailed(session: CameraCaptureSession) {
                 Log.i(MyApplication.tagForTesting, "configuration failed")
             }
 
+            //when required amount of photos is taken and timeToStop is set to true
+            //camera is closed and handlerThread for camera processes is stopped
+            //ImageManipulator is started
             override fun onReady(session: CameraCaptureSession) {
-                if(timeToStop){
+                if (timeToStop) {
                     closeCamera()
                     stopBackgroundThread()
                     timeToStop = false
@@ -196,17 +210,18 @@ class CameraHandler(private val context: Context) {
         //val sessionConfiguration = SessionConfiguration(SessionConfiguration.SESSION_REGULAR,outputConfigurationList,)
 
         Log.i(MyApplication.tagForTesting, cameraId)
-    }
-/*
-    fun getCameraService(service: CameraService) {
-        cameraService = service
-    }*/
+    }//useCamera ends
 
-    fun closeCamera(){
+    /*
+        Closes the camera and imageReader. This function is used in CameraCaptureSession.StateCallback
+        onReady, after set amount of photos is taken.
+     */
+    private fun closeCamera() {
         cameraDevice.close()
         imageReader.close()
     }
 
+    //starts handler processes for camera callbacks where handler is needed
     private fun startBackgroundThread() {
         handlerThread = HandlerThread("camerahandlerthread")
         handlerThread.start()
@@ -215,12 +230,15 @@ class CameraHandler(private val context: Context) {
         )
     }
 
+    //stops handler processes
     private fun stopBackgroundThread() {
         handlerThread.quitSafely()
         handlerThread.join()
     }
 
-    private fun startImageManipulator(){
+    //starts imageManipulator, used when CameraCaptureSession.StateCallback
+    //onReady, after set amount of photos is taken. (timeToStop is set to true)
+    private fun startImageManipulator() {
         imageManipulator = ImageManipulator(context)
     }
 

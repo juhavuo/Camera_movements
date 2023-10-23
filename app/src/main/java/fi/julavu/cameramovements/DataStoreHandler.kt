@@ -1,3 +1,11 @@
+/**
+ * DatastoreHandler is for handle settings for camera and image manipulating.
+ * Lot of functions are with keyword suspend, so thay are needed to use in
+ * coroutine.
+ *
+ * Juha Vuokko
+ */
+
 package fi.julavu.cameramovements
 
 import android.content.Context
@@ -33,7 +41,6 @@ class DataStoreHandler(val context: Context) {
                 seekbarProgressValues.add(valueFromPreferences)
             }
         }
-
         return seekbarProgressValues
     }*/
 
@@ -82,6 +89,14 @@ class DataStoreHandler(val context: Context) {
         val preferencesValue = intPreferencesKey(sizeTag)
         dataStore.edit {
             settings -> settings[preferencesValue] = sizeIndex
+        }
+    }
+
+    //for use in test phase if some changes is done, what is saved in datastore
+    //so that no unused values is left there
+    suspend fun clearDatastore(){
+        dataStore.edit {
+            it.clear()
         }
     }
 

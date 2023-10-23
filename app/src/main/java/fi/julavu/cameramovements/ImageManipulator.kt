@@ -25,7 +25,7 @@ class ImageManipulator(context: Context) {
     private var amountOfFiles = 0
     //private var fileNumber = 0
     private var bitmapBase: Bitmap? = null
-    private var files: Array<File>?
+    private var files: Array<File>? = null
 
     init {
         handlerThread.start()
@@ -33,33 +33,37 @@ class ImageManipulator(context: Context) {
             handlerThread.looper
         )
         fileHandler = FileHandler(context)
-        files = fileHandler.getTemporaryPhotoFiles()
-        if(files!=null) {
-            amountOfFiles = files!!.size
-        }
-        /*
+            files = fileHandler.getTemporaryPhotoFiles()
+            if (files != null) {
+                amountOfFiles = files!!.size
+            }
+            /*
         if(files != null) {
             for (file in files!!) {
                 Log.i(MyApplication.tagForTesting,"filename: ${file.name} filesize: ${file.freeSpace}")
             }
         }*/
-        var bitmap: Bitmap?
-        if(files != null && files!!.isNotEmpty()){
-           bitmap = fileHandler.getBitmap(files!![0])
-            createEmptyBitmap(bitmap)
-            addBitmapToBase(bitmap)
-            for (i in 1 until files!!.size){
-                bitmap = fileHandler.getBitmap(files!![i])
+            var bitmap: Bitmap?
+            if (files != null && files!!.isNotEmpty()) {
+                bitmap = fileHandler.getBitmap(files!![0])
+                createEmptyBitmap(bitmap)
                 addBitmapToBase(bitmap)
+                for (i in 1 until files!!.size) {
+                    bitmap = fileHandler.getBitmap(files!![i])
+                    addBitmapToBase(bitmap)
+                }
             }
-        }
-        if(bitmapBase!=null) {
-            fileHandler.saveEndProductToExternalStorage(bitmapBase!!)
-        }
-        fileHandler.deleteImagesFromTemporaryStorage()
-        Log.i(MyApplication.tagForTesting, " amount of files: ${fileHandler.getAmountOfFilesInTemporaryPhotos()}")
-        stopBackgroundThread()
-        CameraService.stopService()
+            if (bitmapBase != null) {
+                fileHandler.saveEndProductToExternalStorage(bitmapBase!!)
+            }
+            fileHandler.deleteImagesFromTemporaryStorage()
+            Log.i(
+                MyApplication.tagForTesting,
+                " amount of files: ${fileHandler.getAmountOfFilesInTemporaryPhotos()}"
+            )
+            stopBackgroundThread()
+            CameraService.stopService()
+
     }
 
     //https://stackoverflow.com/questions/5663671/creating-an-empty-bitmap-and-drawing-though-canvas-in-android
