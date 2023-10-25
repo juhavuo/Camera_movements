@@ -18,6 +18,7 @@ import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CaptureRequest
 import android.hardware.camera2.TotalCaptureResult
 import android.hardware.camera2.params.OutputConfiguration
+import android.media.Image
 import android.media.ImageReader
 import android.os.Handler
 import android.os.HandlerThread
@@ -74,10 +75,10 @@ class CameraHandler(private val context: Context) {
             request: CaptureRequest,
             result: TotalCaptureResult
         ) {
-            Log.i(
+            /*Log.i(
                 MyApplication.tagForTesting,
                 "capturecallback oncapturecompleted, number $captureCounter"
-            )
+            )*/
             ++captureCounter
             if (captureCounter >= amountOfCaptures) {
                 session.stopRepeating()
@@ -162,8 +163,11 @@ class CameraHandler(private val context: Context) {
         imageReader.setOnImageAvailableListener({
             val image = it.acquireLatestImage()
             handler.post {
-                Log.i(MyApplication.tagForTesting, "Time to save image $image")
-                fileHandler.saveImageToTemporaryStorage(image)
+                //Log.i(MyApplication.tagForTesting, "Time to save image $image")
+                fileHandler.saveImageToTemporaryStorage(image,captureCounter==5)
+                if(captureCounter == 5){
+
+                }
                 image.close()
             }
         }, handler)

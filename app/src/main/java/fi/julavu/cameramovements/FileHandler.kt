@@ -17,12 +17,14 @@ import android.util.Log
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.lang.Exception
 import java.nio.file.Files
 
 class FileHandler(private val context: Context) {
 
     private val usedDirectory = Environment.DIRECTORY_PICTURES
     private val nameOfInternalFolder = "temporaryphotos"
+    private val externalStorageFolderName = "CameraMovementsImages"
     private var fileNumber = 0
     private val fileNameStart = "temp"
     private val fileType = ".jpg"
@@ -33,6 +35,20 @@ class FileHandler(private val context: Context) {
     fun createFolderForTemporaryPhotos(){
         val folderForTemporaryPhotos = context.getDir(nameOfInternalFolder,Context.MODE_PRIVATE)
         folderForTemporaryPhotos.mkdir()
+    }
+
+    private fun getExternalStoragePath(): File = File(Environment.getExternalStoragePublicDirectory(usedDirectory),externalStorageFolderName)
+
+    fun createFolderInExternalStorage(): Boolean{
+        var succeeded = false
+        val externalStorageFolder = getExternalStoragePath()
+        try {
+            externalStorageFolder.mkdir()
+            succeeded = true
+        }catch (secExp: SecurityException){
+            Log.e(MyApplication.tagForTesting, "failing creating folder: ${secExp.toString()}")
+        }
+        return succeeded
     }
 
     /**
@@ -52,7 +68,7 @@ class FileHandler(private val context: Context) {
         Get all files from external storage, if directory doesn't exist returns null
      */
     fun getImageFilesFromExternalStorage(): Array<File>?{
-        val externalStorageFolder = Environment.getExternalStoragePublicDirectory(usedDirectory)
+        val externalStorageFolder = getExternalStoragePath()
         return if(externalStorageFolder.exists()){
             externalStorageFolder.listFiles()
         }else{
@@ -92,7 +108,7 @@ class FileHandler(private val context: Context) {
     fun saveImageToTemporaryStorage(image: Image){
             val folderForTemporaryPhotos = context.getDir(nameOfInternalFolder,Context.MODE_PRIVATE)
             val file = File(folderForTemporaryPhotos,"$fileNameStart$fileNumber$fileType")
-            Log.i(MyApplication.tagForTesting,"name: ${file.name} path: ${file.path}")
+            //Log.i(MyApplication.tagForTesting,"name: ${file.name} path: ${file.path}")
             //https://stackoverflow.com/questions/41775968/how-to-convert-android-media-image-to-bitmap-object
             val byteBuffer = image.planes[0].buffer
             val bytes = ByteArray(byteBuffer.capacity())
@@ -103,6 +119,26 @@ class FileHandler(private val context: Context) {
             if(isSaved) {
                 ++fileNumber
             }
+    }
+
+    fun saveImageToTemporaryStorage(image: Image, alsoToExternal: Boolean){
+        val folderForTemporaryPhotos = context.getDir(nameOfInternalFolder,Context.MODE_PRIVATE)
+        val file = File(folderForTemporaryPhotos,"$fileNameStart$fileNumber$fileType")
+        //Log.i(MyApplication.tagForTesting,"name: ${file.name} path: ${file.path}")
+        //https://stackoverflow.com/questions/41775968/how-to-convert-android-media-image-to-bitmap-object
+        val byteBuffer = image.planes[0].buffer
+        val bytes = ByteArray(byteBuffer.capacity())
+        byteBuffer.get(bytes)
+        //Log.i(MyApplication.tagForTesting, "bytes size: $bytes")
+        val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, null)
+        val isSaved = saveImageToFolder(bitmap,file)
+        if(alsoToExternal){
+            Log.i(MyApplication.tagForTesting,"time to save photo to external storage")
+            saveEndProductToExternalStorage(bitmap)
+        }
+        if(isSaved) {
+            ++fileNumber
+        }
     }
 
     /**
@@ -123,7 +159,7 @@ class FileHandler(private val context: Context) {
      */
     fun saveEndProductToExternalStorage(bitmap: Bitmap): String{
         val imageName = "image${System.currentTimeMillis()}.jpg"
-        val externalDir = Environment.getExternalStoragePublicDirectory(usedDirectory)
+        val externalDir = getExternalStoragePath()
         val imageFile = File(externalDir,imageName)
         saveImageToFolder(bitmap,imageFile)
         return imageName
@@ -134,20 +170,30 @@ class FileHandler(private val context: Context) {
      */
     //https://mkyong.com/java/how-to-rename-file-in-java/
     fun renameSavedFile(fileName: String){
-        val externalPath = Environment.getExternalStoragePublicDirectory(usedDirectory).toPath()
+        val externalPath = getExternalStoragePath().toPath()
         Files.move(externalPath,externalPath.resolveSibling("$fileName$fileType"))
     }
 
-    fun getBitmap(sourceFile: File): Bitmap = BitmapFactory.decodeFile(sourceFile.path)
+    fun getBitmap(sourceFile: File): Bitmap?{
+        val bitmap: Bitmap? = null
+        try {
+            BitmapFactory.decodeFile(sourceFile.absolutePath)
+        }catch (e: Exception){
+            Log.e(MyApplication.tagForTesting,"in getBitmap, Filehandler: ${e.toString()}")
+        }
+        return bitmap
+    }
 
     /**
      * Get thumbnail to be shown in ImageGalleryActivity.
      */
     //https://stackoverflow.com/questions/14110163/getting-image-thumbnail-in-android
-    fun getThumbnail(imageFile: File, thumbnailWidth: Int): Bitmap{
+    fun getThumbnail(imageFile: File, thumbnailWidth: Int): Bitmap?{
         val bitmap = getBitmap(imageFile)
-        val aspectRatio = (bitmap.width)/((bitmap.height).toFloat())
-        val thumbnailHeight: Int = Math.round(thumbnailWidth/aspectRatio)
-        return Bitmap.createScaledBitmap(bitmap,thumbnailWidth,thumbnailHeight,false)
+        return if(bitmap != null) {
+            val aspectRatio = (bitmap.width) / ((bitmap.height).toFloat())
+            val thumbnailHeight: Int = Math.round(thumbnailWidth / aspectRatio)
+            Bitmap.createScaledBitmap(bitmap, thumbnailWidth, thumbnailHeight, false)
+        } else null
     }
 }

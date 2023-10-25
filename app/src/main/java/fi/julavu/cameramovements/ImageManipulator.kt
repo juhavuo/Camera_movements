@@ -41,6 +41,8 @@ class ImageManipulator(context: Context) {
             if (files != null) {
                 amountOfFiles = files!!.size
             }
+        val directoryCreated = fileHandler.createFolderInExternalStorage()
+        Log.i(MyApplication.tagForTesting, "external directory created $directoryCreated")
             /*
         if(files != null) {
             for (file in files!!) {
@@ -50,11 +52,15 @@ class ImageManipulator(context: Context) {
             var bitmap: Bitmap?
             if (files != null && files!!.isNotEmpty()) {
                 bitmap = fileHandler.getBitmap(files!![0])
-                createEmptyBitmap(bitmap)
-                addBitmapToBase(bitmap)
-                for (i in 1 until files!!.size) {
-                    bitmap = fileHandler.getBitmap(files!![i])
+                if(bitmap != null) {
+                    createEmptyBitmap(bitmap)
                     addBitmapToBase(bitmap)
+                    for (i in 1 until files!!.size) {
+                        bitmap = fileHandler.getBitmap(files!![i])
+                        if(bitmap != null) {
+                            addBitmapToBase(bitmap)
+                        }
+                    }
                 }
             }
             if (bitmapBase != null) {
