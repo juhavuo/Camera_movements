@@ -19,15 +19,21 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.lang.Exception
 import java.nio.file.Files
+import kotlin.math.roundToInt
 
 class FileHandler(private val context: Context) {
 
     private val usedDirectory = Environment.DIRECTORY_PICTURES
     private val nameOfInternalFolder = "temporaryphotos"
-    private val externalStorageFolderName = "CameraMovementsImages"
+
     private var fileNumber = 0
     private val fileNameStart = "temp"
     private val fileType = ".jpg"
+
+    companion object{
+        const val externalImageFolderName = "CameraMovementsImages"
+        const val nameOfFolderForPhotoSamples ="CameraMovementsTesting" //for checking that camera works correctly
+    }
 
     /**
      * Create folder in internal storage.
@@ -37,16 +43,16 @@ class FileHandler(private val context: Context) {
         folderForTemporaryPhotos.mkdir()
     }
 
-    private fun getExternalStoragePath(): File = File(Environment.getExternalStoragePublicDirectory(usedDirectory),externalStorageFolderName)
+    private fun getExternalStoragePath(externalFolderName: String): File = File(Environment.getExternalStoragePublicDirectory(usedDirectory),externalFolderName)
 
-    fun createFolderInExternalStorage(): Boolean{
+    fun createFolderInExternalStorage(externalFolderName: String): Boolean{
         var succeeded = false
-        val externalStorageFolder = getExternalStoragePath()
+        val externalStorageFolder = getExternalStoragePath(externalFolderName)
         try {
             externalStorageFolder.mkdir()
             succeeded = true
         }catch (secExp: SecurityException){
-            Log.e(MyApplication.tagForTesting, "failing creating folder: ${secExp.toString()}")
+            Log.e(MyApplication.tagForTesting, "failing creating folder: $secExp")
         }
         return succeeded
     }
@@ -67,8 +73,8 @@ class FileHandler(private val context: Context) {
     /**
         Get all files from external storage, if directory doesn't exist returns null
      */
-    fun getImageFilesFromExternalStorage(): Array<File>?{
-        val externalStorageFolder = getExternalStoragePath()
+    fun getImageFilesFromExternalStorage(externalFolderName: String): Array<File>?{
+        val externalStorageFolder = getExternalStoragePath(externalFolderName)
         return if(externalStorageFolder.exists()){
             externalStorageFolder.listFiles()
         }else{
@@ -91,8 +97,9 @@ class FileHandler(private val context: Context) {
         var fileOutputStream: FileOutputStream? = null
         try{
             fileOutputStream = FileOutputStream(fileToSave)
-            Log.i(MyApplication.tagForTesting,"fileoutputstream: $fileOutputStream")
-            bitmap.compress(Bitmap.CompressFormat.JPEG,80,fileOutputStream)
+            //Log.i(MyApplication.tagForTesting,"fileoutputstream: $fileOutputStream")
+            val bitmapOK = bitmap.compress(Bitmap.CompressFormat.JPEG,80,fileOutputStream)
+            Log.i(MyApplication.tagForTesting,"bitmap compress: $bitmapOK")
             isSaved = true
         }catch (ioException: IOException){
             Log.e(MyApplication.tagForTesting,ioException.toString())
@@ -121,7 +128,7 @@ class FileHandler(private val context: Context) {
             }
     }
 
-    fun saveImageToTemporaryStorage(image: Image, alsoToExternal: Boolean){
+    fun saveImageToTemporaryStorage(image: Image, alsoToExternal: Boolean, externalFolderName: String){
         val folderForTemporaryPhotos = context.getDir(nameOfInternalFolder,Context.MODE_PRIVATE)
         val file = File(folderForTemporaryPhotos,"$fileNameStart$fileNumber$fileType")
         //Log.i(MyApplication.tagForTesting,"name: ${file.name} path: ${file.path}")
@@ -134,7 +141,7 @@ class FileHandler(private val context: Context) {
         val isSaved = saveImageToFolder(bitmap,file)
         if(alsoToExternal){
             Log.i(MyApplication.tagForTesting,"time to save photo to external storage")
-            saveEndProductToExternalStorage(bitmap)
+            saveToExternalStorage(bitmap, externalFolderName)
         }
         if(isSaved) {
             ++fileNumber
@@ -157,20 +164,23 @@ class FileHandler(private val context: Context) {
     /**
      * Save file as image{timestamp}.jpg and image name is given as return value
      */
-    fun saveEndProductToExternalStorage(bitmap: Bitmap): String{
+    fun saveToExternalStorage(bitmap: Bitmap, externalFolderName: String): String{
         val imageName = "image${System.currentTimeMillis()}.jpg"
-        val externalDir = getExternalStoragePath()
+        val externalDir = getExternalStoragePath(externalFolderName)
         val imageFile = File(externalDir,imageName)
-        saveImageToFolder(bitmap,imageFile)
+        val isSaved = saveImageToFolder(bitmap,imageFile)
+        Log.i(MyApplication.tagForTesting,"saving to external storage: $isSaved")
         return imageName
     }
+
+
 
     /**
      * Change file name in external storage.
      */
     //https://mkyong.com/java/how-to-rename-file-in-java/
     fun renameSavedFile(fileName: String){
-        val externalPath = getExternalStoragePath().toPath()
+        val externalPath = getExternalStoragePath(externalImageFolderName).toPath()
         Files.move(externalPath,externalPath.resolveSibling("$fileName$fileType"))
     }
 
@@ -179,7 +189,7 @@ class FileHandler(private val context: Context) {
         try {
             BitmapFactory.decodeFile(sourceFile.absolutePath)
         }catch (e: Exception){
-            Log.e(MyApplication.tagForTesting,"in getBitmap, Filehandler: ${e.toString()}")
+            Log.e(MyApplication.tagForTesting,"in getBitmap, Filehandler: $e")
         }
         return bitmap
     }
@@ -192,7 +202,7 @@ class FileHandler(private val context: Context) {
         val bitmap = getBitmap(imageFile)
         return if(bitmap != null) {
             val aspectRatio = (bitmap.width) / ((bitmap.height).toFloat())
-            val thumbnailHeight: Int = Math.round(thumbnailWidth / aspectRatio)
+            val thumbnailHeight: Int = (thumbnailWidth / aspectRatio).roundToInt()
             Bitmap.createScaledBitmap(bitmap, thumbnailWidth, thumbnailHeight, false)
         } else null
     }

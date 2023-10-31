@@ -14,8 +14,6 @@ package fi.julavu.cameramovements
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.os.Handler
-import android.os.HandlerThread
 import android.util.Log
 import androidx.core.graphics.set
 import java.io.File
@@ -24,7 +22,7 @@ class ImageManipulator(context: Context) {
 
     //private var handler: Handler
     //private var handlerThread: HandlerThread = HandlerThread("imagemanipulatiopthread")
-    private var fileHandler: FileHandler
+    //private var fileHandler: FileHandler
     private var amountOfFiles = 0
     //private var fileNumber = 0
     private var bitmapBase: Bitmap? = null
@@ -36,12 +34,13 @@ class ImageManipulator(context: Context) {
         handler = Handler(
             handlerThread.looper
         )*/
+        /*
         fileHandler = FileHandler(context)
             files = fileHandler.getTemporaryPhotoFiles()
             if (files != null) {
                 amountOfFiles = files!!.size
             }
-        val directoryCreated = fileHandler.createFolderInExternalStorage()
+        val directoryCreated = fileHandler.createFolderInExternalStorage(FileHandler.externalImageFolderName)
         Log.i(MyApplication.tagForTesting, "external directory created $directoryCreated")
             /*
         if(files != null) {
@@ -64,7 +63,9 @@ class ImageManipulator(context: Context) {
                 }
             }
             if (bitmapBase != null) {
-                fileHandler.saveEndProductToExternalStorage(bitmapBase!!)
+                fileHandler.saveToExternalStorage(bitmapBase!!, FileHandler.externalImageFolderName)
+            }else{
+                Log.i(MyApplication.tagForTesting,"bitmapbase is null")
             }
             fileHandler.deleteImagesFromTemporaryStorage()
             Log.i(
@@ -72,6 +73,8 @@ class ImageManipulator(context: Context) {
                 " amount of files: ${fileHandler.getAmountOfFilesInTemporaryPhotos()}"
             )
             //stopBackgroundThread()
+
+         */
             CameraService.stopService()
 
     }

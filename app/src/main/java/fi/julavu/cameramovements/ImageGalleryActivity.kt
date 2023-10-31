@@ -37,8 +37,8 @@ class ImageGalleryActivity : ComponentActivity() {
         recyclerView.adapter = galleryRecyclerViewAdapter
 
         Thread {
-            val files: Array<File>? = fileHandler.getImageFilesFromExternalStorage()
-            val fileWidth = 64;
+            val files: Array<File>? = fileHandler.getImageFilesFromExternalStorage(FileHandler.externalImageFolderName)
+            val fileWidth = 64
             var thumbnail: Bitmap?
             if (files != null) {
                 for (i in files.indices) {

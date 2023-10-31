@@ -18,7 +18,6 @@ import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CaptureRequest
 import android.hardware.camera2.TotalCaptureResult
 import android.hardware.camera2.params.OutputConfiguration
-import android.media.Image
 import android.media.ImageReader
 import android.os.Handler
 import android.os.HandlerThread
@@ -75,10 +74,10 @@ class CameraHandler(private val context: Context) {
             request: CaptureRequest,
             result: TotalCaptureResult
         ) {
-            /*Log.i(
+            Log.i(
                 MyApplication.tagForTesting,
-                "capturecallback oncapturecompleted, number $captureCounter"
-            )*/
+                "capturecallback oncapturecompleted, $result"
+            )
             ++captureCounter
             if (captureCounter >= amountOfCaptures) {
                 session.stopRepeating()
@@ -126,6 +125,7 @@ class CameraHandler(private val context: Context) {
         startBackgroundThread()
         fileHandler = FileHandler(context)
         fileHandler.createFolderForTemporaryPhotos() //creates folder if it doesn't exist
+        fileHandler.createFolderInExternalStorage(FileHandler.nameOfFolderForPhotoSamples)
         cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         val camIds: Array<String> = cameraManager.cameraIdList
         for (camId in camIds) {
@@ -164,10 +164,7 @@ class CameraHandler(private val context: Context) {
             val image = it.acquireLatestImage()
             handler.post {
                 //Log.i(MyApplication.tagForTesting, "Time to save image $image")
-                fileHandler.saveImageToTemporaryStorage(image,captureCounter==5)
-                if(captureCounter == 5){
-
-                }
+                fileHandler.saveImageToTemporaryStorage(image,true,FileHandler.nameOfFolderForPhotoSamples)
                 image.close()
             }
         }, handler)
