@@ -8,6 +8,7 @@
 
 package fi.julavu.cameramovements
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
@@ -18,7 +19,20 @@ import kotlinx.coroutines.flow.map
 //https://stackoverflow.com/questions/66466345/proper-instance-creation-of-androids-jetpack-datastore-alpha07-version
 private val Context.dataStore by preferencesDataStore(name = "settings")
 
-class DataStoreHandler(val context: Context) {
+class DataStoreHandler private constructor(val context: Context) {
+
+    companion object{
+
+        @SuppressLint("StaticFieldLeak")
+        @Volatile
+        private var instance: DataStoreHandler? = null
+
+        fun getInstance(c: Context) = instance ?: synchronized(this) {
+            instance ?: DataStoreHandler(c).also {
+                instance = it
+            }
+        }
+    }
 
     //private val timespan_tag = "TIMESPAN_VALUE"
     private val dataStore = context.dataStore

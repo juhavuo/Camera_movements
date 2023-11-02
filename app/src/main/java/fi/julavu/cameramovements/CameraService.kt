@@ -37,7 +37,7 @@ class CameraService: Service() {
         cameraHandler = CameraHandler(this)
         isServiceStarted = true
         CoroutineScope(Dispatchers.Main).launch {
-            cameraHandler.fetchSettingsData()
+            cameraHandler.prepareCamera()
             cameraHandler.useCamera()
 
         }

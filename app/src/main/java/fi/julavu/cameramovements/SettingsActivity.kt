@@ -33,8 +33,9 @@ class SettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
-        dataStoreHandler = DataStoreHandler(this)
+        dataStoreHandler = DataStoreHandler.getInstance(this)
 
+        //val sizes = CameraHandler.getSizes(this)
         val sizes = CameraHandler.getSizes(this)
         val sizesListedForSpinner = ArrayList<String>()
         for(size in sizes){
