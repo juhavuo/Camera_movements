@@ -26,10 +26,10 @@ import kotlinx.coroutines.launch
 class SettingsActivity : ComponentActivity() {
 
     private lateinit var dataStoreHandler: DataStoreHandler
-    //private lateinit var durationSeekBar: SeekBar
     private lateinit var sizesSpinner: Spinner
     private val settingsDataList = ArrayList<SettingsData>()
     private val seekBars = ArrayList<SeekBar>()
+    private val valTextViews = ArrayList<TextView>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
@@ -38,44 +38,49 @@ class SettingsActivity : ComponentActivity() {
         //val sizes = CameraHandler.getSizes(this)
         val sizes = CameraHandler.getSizes(this)
         val sizesListedForSpinner = ArrayList<String>()
-        for(size in sizes){
+        for (size in sizes) {
             sizesListedForSpinner.add(size.toString())
         }
-        var defaultSize = sizes.size/2
-        if(sizes.size == 1){
+        var defaultSize = sizes.size / 2
+        if (sizes.size == 1) {
             defaultSize = 0
         }
 
         sizesSpinner = findViewById(R.id.settings_activity_size_spinner)
-        val sizesSpinnerAdapter = ArrayAdapter(this,android.R.layout.simple_spinner_item,sizesListedForSpinner)
+        val sizesSpinnerAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, sizesListedForSpinner)
         sizesSpinner.adapter = sizesSpinnerAdapter
 
-        val amountOfPhotosSettings = SettingsData.getSettingsData(this,R.string.for_amount_of_photos_seekbar)
-        setupSeekbar(R.id.settings_activity_amount_of_images_view,amountOfPhotosSettings)
+        val amountOfPhotosSettings =
+            SettingsData.getSettingsData(this, R.string.for_amount_of_photos_seekbar)
+        setupSeekbar(R.id.settings_activity_amount_of_images_view, amountOfPhotosSettings)
         CoroutineScope(Dispatchers.Main).launch {
 
             //when saved data is changed
             //dataStoreHandler.clearDatastore()
+            val sizeIndex = dataStoreHandler.getImageSizeIndex()
+            if (sizeIndex >= 0) {
+                sizesSpinner.setSelection(sizeIndex)
+            } else {
+                sizesSpinner.setSelection(defaultSize)
+            }
+            for (i in 0 until seekBars.size) {
+                settingsDataList[i].progress =
+                    dataStoreHandler.getSeekbarProgressValue(settingsDataList[i])
+                seekBars[i].progress = settingsDataList[i].progress
+                valTextViews[i].text = settingsDataList[i].progress.toString()
 
-          for(i in 0 until seekBars.size){
-              settingsDataList[i].progress = dataStoreHandler.getSeekbarProgressValue(settingsDataList[i])
-              seekBars[i].progress = settingsDataList[i].progress
-              val sizeIndex = dataStoreHandler.getImageSizeIndex()
-              if(sizeIndex>=0) {
-                  sizesSpinner.setSelection(sizeIndex)
-              }else{
-                  sizesSpinner.setSelection(defaultSize)
-              }
-          }
+            }
         }
-        for(i in 0 until seekBars.size){
-            seekBars[i].setOnSeekBarChangeListener(object: OnSeekBarChangeListener{
+        for (i in 0 until seekBars.size) {
+            seekBars[i].setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
                 override fun onProgressChanged(
                     seekBar: SeekBar?,
                     progress: Int,
                     fromUser: Boolean
                 ) {
                     settingsDataList[i].progress = progress
+                    valTextViews[i].text = progress.toString()
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {}
@@ -102,29 +107,33 @@ class SettingsActivity : ComponentActivity() {
      * Using include-tag in actitity_settings.xml forces to do more
      * setting up in activity. Seekbars are stored in arraylist.
      */
-    private fun setupSeekbar(id: Int, settingsData: SettingsData){
+    private fun setupSeekbar(id: Int, settingsData: SettingsData) {
 
         val seekBarLayout = findViewById<RelativeLayout>(id)
         val seekBar = seekBarLayout.findViewById<SeekBar>(R.id.template_seekbar)
+        seekBar.min = settingsData.sliderMin
+        seekBar.max = settingsData.sliderMax
         val seekBarTitle = seekBarLayout.findViewById<TextView>(R.id.seekbar_title)
         seekBarTitle.text = settingsData.title
         val seekBarMinTextView = seekBarLayout.findViewById<TextView>(R.id.seekbar_min_text_view)
         seekBarMinTextView.text = settingsData.sliderMin.toString()
         val seekBarMaxTextView = seekBarLayout.findViewById<TextView>(R.id.seekbar_max_text_view)
         seekBarMaxTextView.text = settingsData.sliderMax.toString()
+        val seekBarValTextView = seekBarLayout.findViewById<TextView>(R.id.seekbar_val_text_view)
         seekBars.add(seekBar)
         settingsDataList.add(settingsData)
+        valTextViews.add(seekBarValTextView)
     }
 
-    private fun goBackToRecording(){
-        val intent = Intent(this,RecordingActivity::class.java)
+    private fun goBackToRecording() {
+        val intent = Intent(this, RecordingActivity::class.java)
         startActivity(intent)
     }
 
     /*
         If save settings is pressed, all the current values are saved to dataStore.
      */
-    private fun saveAllSettings(){
+    private fun saveAllSettings() {
         CoroutineScope(Dispatchers.Main).launch {
             dataStoreHandler.writeSeekbarProgressValues(settingsDataList)
             dataStoreHandler.writeImageSize(sizesSpinner.selectedItemPosition)

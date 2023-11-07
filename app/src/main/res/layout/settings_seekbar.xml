@@ -20,27 +20,31 @@
         android:layout_height="wrap_content"
         android:id="@+id/template_seekbar"
         android:layout_margin="25dp"
-        android:layout_below="@id/seekbar_title"
-
-        />
+        android:layout_below="@id/seekbar_title" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/seekbar_min_text_view"
-        android:text="min"
+        tools:text="min"
         android:layout_marginStart="30dp"
-        android:layout_below="@id/template_seekbar"
-        tools:ignore="HardcodedText" />
+        android:layout_below="@id/template_seekbar"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/seekbar_max_text_view"
-        android:text="max"
+        tools:text="max"
         android:layout_marginEnd="30dp"
         android:layout_below="@id/template_seekbar"
-        android:layout_alignParentEnd="true"
-        tools:ignore="HardcodedText" />
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id = "@+id/seekbar_val_text_view"
+        tools:text="val"
+        android:layout_below="@id/template_seekbar"
+        android:layout_centerHorizontal="true"/>
 
 </RelativeLayout>

@@ -18,7 +18,7 @@
     <string name="notification_channel_title">Camera Movements</string>
     <string name="notification_channel_name">CameraMovementsChannel</string>
     <string name="notification_channel_description">For use of camera</string>
-    <string name="for_amount_of_photos_seekbar">Amount of photos,5,30,120,photos</string>
+    <string name="for_amount_of_photos_seekbar">Amount of photos,10,20,120,photos</string>
     <string name="title_activity_image_gallery">ImageGalleryActivity</string>
     <string name="gallery_activity_title">Images</string>
 </resources>

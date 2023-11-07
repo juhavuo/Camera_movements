@@ -22,7 +22,7 @@ class ImageManipulator(context: Context) {
 
     //private var handler: Handler
     //private var handlerThread: HandlerThread = HandlerThread("imagemanipulatiopthread")
-    //private var fileHandler: FileHandler
+    private var fileHandler: FileHandler
     private var amountOfFiles = 0
     //private var fileNumber = 0
     private var bitmapBase: Bitmap? = null
@@ -34,7 +34,7 @@ class ImageManipulator(context: Context) {
         handler = Handler(
             handlerThread.looper
         )*/
-        /*
+
         fileHandler = FileHandler(context)
             files = fileHandler.getTemporaryPhotoFiles()
             if (files != null) {
@@ -73,8 +73,6 @@ class ImageManipulator(context: Context) {
                 " amount of files: ${fileHandler.getAmountOfFilesInTemporaryPhotos()}"
             )
             //stopBackgroundThread()
-
-         */
             CameraService.stopService()
 
     }

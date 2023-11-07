@@ -12,7 +12,9 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.Image
+import android.net.Uri
 import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import java.io.File
 import java.io.FileOutputStream
@@ -109,6 +111,12 @@ class FileHandler(private val context: Context) {
         return isSaved
     }
 
+    fun getFileFromInternalStorage(number: Int): File{
+        val folderForTemporaryPhotos = context.getDir(nameOfInternalFolder,Context.MODE_PRIVATE)
+        return File(folderForTemporaryPhotos,"$fileNameStart$number$fileType")
+
+    }
+
     /**
      * The file is saved as temp{number}.jpg to internal storage
      */
@@ -147,6 +155,20 @@ class FileHandler(private val context: Context) {
             ++fileNumber
         }
     }
+/*
+    fun saveImageToTemporaryStorage(uri: Uri, alsoToExternal: Boolean, externalFolderName: String){
+        //Log.i(MyApplication.tagForTesting,"name: ${file.name} path: ${file.path}")
+        //https://stackoverflow.com/questions/41775968/how-to-convert-android-media-image-to-bitmap-object
+        val bitmap =
+        val isSaved = saveImageToFolder(bitmap,file)
+        if(alsoToExternal){
+            Log.i(MyApplication.tagForTesting,"time to save photo to external storage")
+            saveToExternalStorage(bitmap, externalFolderName)
+        }
+        if(isSaved) {
+            ++fileNumber
+        }
+    }*/
 
     /**
         Deletes all files from temporary storage. This used after image operations are done to
