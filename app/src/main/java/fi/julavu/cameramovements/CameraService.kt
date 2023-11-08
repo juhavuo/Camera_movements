@@ -7,11 +7,12 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import androidx.lifecycle.LifecycleService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class CameraService: Service() {
+class CameraService: LifecycleService() {
 
     companion object{
         lateinit var instance: CameraService
@@ -29,11 +30,13 @@ class CameraService: Service() {
     private lateinit var cameraHandler: CameraHandler
 
     override fun onCreate() {
+        super.onCreate()
         Log.i(MyApplication.tagForTesting, "service on create")
         startServiceForeground()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
         cameraHandler = CameraHandler(this)
         isServiceStarted = true
         CoroutineScope(Dispatchers.Main).launch {
@@ -46,11 +49,13 @@ class CameraService: Service() {
     }
 
     override fun onDestroy() {
+        super.onDestroy()
         isServiceStarted = false
         Log.i(MyApplication.tagForTesting, "service on destroy")
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
+    override fun onBind(intent: Intent): IBinder? {
+        super.onBind(intent)
         return null
     }
 

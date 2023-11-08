@@ -37,8 +37,12 @@ class ImageManipulator(context: Context) {
 
         fileHandler = FileHandler(context)
             files = fileHandler.getTemporaryPhotoFiles()
+
             if (files != null) {
                 amountOfFiles = files!!.size
+                Log.i(MyApplication.tagForTesting,"amount of files: ${files!!.size}")
+            }else{
+                Log.i(MyApplication.tagForTesting,"no files in internal storage")
             }
         val directoryCreated = fileHandler.createFolderInExternalStorage(FileHandler.externalImageFolderName)
         Log.i(MyApplication.tagForTesting, "external directory created $directoryCreated")

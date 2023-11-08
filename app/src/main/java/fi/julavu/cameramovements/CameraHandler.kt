@@ -12,11 +12,16 @@ import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.util.Log
 import android.util.Size
+import androidx.camera.core.Camera
+import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
 import androidx.camera.core.ImageCapture.OutputFileOptions
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.impl.ImageCaptureConfig
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleOwner
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
@@ -27,7 +32,9 @@ class CameraHandler(private val context: Context) {
     private lateinit var imageCapture: ImageCapture
     private val fileHandler = FileHandler(context)
     private lateinit var imageCaptureConfig: ImageCaptureConfig
+    private lateinit var cameraProvider: ProcessCameraProvider
     private lateinit var cameraExecutor: Executor
+    private lateinit var camera: Camera
     private var amountOfPhotos = 0
     private var outputSize = Size(720, 480)
 
@@ -47,46 +54,63 @@ class CameraHandler(private val context: Context) {
         }
     }
 
-    suspend fun getSettings(){
+    suspend fun getSettings() {
         dataStoreHandler = DataStoreHandler.getInstance(context)
-        val amountSettingsData = SettingsData.getSettingsData(context,R.string.for_amount_of_photos_seekbar)
+        val amountSettingsData =
+            SettingsData.getSettingsData(context, R.string.for_amount_of_photos_seekbar)
         amountOfPhotos = dataStoreHandler.getSeekbarProgressValue(amountSettingsData)
         val sizes = getSizes(context)
         outputSize = sizes[dataStoreHandler.getImageSizeIndex()]
         Log.i(MyApplication.tagForTesting, "getsettings: $amountOfPhotos")
     }
 
-    fun prepareCamera(){
-        Log.i(MyApplication.tagForTesting, "prepareCamera")
+    fun prepareCamera() {
+
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+
+        cameraProvider = cameraProviderFuture.get()
+
+        val cameraSelector = CameraSelector.Builder()
+            .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+            .build()
+
         imageCapture = ImageCapture.Builder()
             .setCaptureMode(CAPTURE_MODE_MINIMIZE_LATENCY)
             .setTargetResolution(outputSize)
             .build()
         cameraExecutor = Executors.newSingleThreadExecutor()
 
+        camera =
+            cameraProvider.bindToLifecycle(context as LifecycleOwner, cameraSelector, imageCapture)
+
+
+        Log.i(MyApplication.tagForTesting, "prepareCamera")
+
     }
 
-    fun useCamera(){
-        Log.i(MyApplication.tagForTesting,"useCamera")
+    fun useCamera() {
+        Log.i(MyApplication.tagForTesting, "useCamera")
 
         var outputFileOptions: OutputFileOptions
-        Log.i(MyApplication.tagForTesting,"amount of photos: $amountOfPhotos")
-        for (i in 0 until amountOfPhotos){
-            Log.i(MyApplication.tagForTesting,"photo number: $i")
-            outputFileOptions = OutputFileOptions.Builder(fileHandler.getFileFromInternalStorage(i)).build()
-            imageCapture.takePicture(outputFileOptions,cameraExecutor!!,
-            object : ImageCapture.OnImageSavedCallback{
-                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                    val uri = outputFileResults.savedUri
-                    Log.i(MyApplication.tagForTesting,"onImageSaved $uri")
-                }
+        Log.i(MyApplication.tagForTesting, "amount of photos: $amountOfPhotos")
+        for (i in 0 until amountOfPhotos) {
+            Log.i(MyApplication.tagForTesting, "photo number: $i")
+            outputFileOptions =
+                OutputFileOptions.Builder(fileHandler.getFileFromInternalStorage(i)).build()
+            imageCapture.takePicture(outputFileOptions, cameraExecutor!!,
+                object : ImageCapture.OnImageSavedCallback {
+                    override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                        val uri = outputFileResults.savedUri
+                        Log.i(MyApplication.tagForTesting, "onImageSaved $uri")
+                    }
 
-                override fun onError(exception: ImageCaptureException) {
-                   Log.e(MyApplication.tagForTesting,"error when taking picture: $exception")
-                }
+                    override fun onError(exception: ImageCaptureException) {
+                        Log.e(MyApplication.tagForTesting, "error when taking picture: $exception")
+                    }
 
-            })
+                })
         }//for loop to take photos
         imageManipulator = ImageManipulator(context)
+        cameraProvider.unbindAll() // stop using camera
     }//use camera
 }
