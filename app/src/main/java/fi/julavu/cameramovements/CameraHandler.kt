@@ -52,6 +52,7 @@ class CameraHandler(private val context: Context) {
             }
             return sizes
         }
+
     }
 
     suspend fun getSettings() {
@@ -70,27 +71,34 @@ class CameraHandler(private val context: Context) {
 
         cameraProvider = cameraProviderFuture.get()
 
-        val cameraSelector = CameraSelector.Builder()
-            .requireLensFacing(CameraSelector.LENS_FACING_BACK)
-            .build()
+        cameraProviderFuture.addListener(Runnable {
 
-        imageCapture = ImageCapture.Builder()
-            .setCaptureMode(CAPTURE_MODE_MINIMIZE_LATENCY)
-            .setTargetResolution(outputSize)
-            .build()
-        cameraExecutor = Executors.newSingleThreadExecutor()
+            val cameraSelector = CameraSelector.Builder()
+                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                .build()
 
-        camera =
-            cameraProvider.bindToLifecycle(context as LifecycleOwner, cameraSelector, imageCapture)
+            imageCapture = ImageCapture.Builder()
+                .setCaptureMode(CAPTURE_MODE_MINIMIZE_LATENCY)
+                .setTargetResolution(outputSize)
+                .build()
+            cameraExecutor = Executors.newSingleThreadExecutor()
 
+            camera =
+                cameraProvider.bindToLifecycle(
+                    context as LifecycleOwner,
+                    cameraSelector,
+                    imageCapture
+                )
 
-        Log.i(MyApplication.tagForTesting, "prepareCamera")
+            Log.i(MyApplication.tagForTesting, "prepareCamera")
+
+        },ContextCompat.getMainExecutor(context))
 
     }
 
     fun useCamera() {
         Log.i(MyApplication.tagForTesting, "useCamera")
-
+        CameraService.isBusy = true
         var outputFileOptions: OutputFileOptions
         Log.i(MyApplication.tagForTesting, "amount of photos: $amountOfPhotos")
         for (i in 0 until amountOfPhotos) {
@@ -102,6 +110,10 @@ class CameraHandler(private val context: Context) {
                     override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                         val uri = outputFileResults.savedUri
                         Log.i(MyApplication.tagForTesting, "onImageSaved $uri")
+                        if(i == amountOfPhotos-1){
+                            imageManipulator = ImageManipulator(context)
+                            imageManipulator.manipulate()
+                        }
                     }
 
                     override fun onError(exception: ImageCaptureException) {
@@ -110,7 +122,9 @@ class CameraHandler(private val context: Context) {
 
                 })
         }//for loop to take photos
-        imageManipulator = ImageManipulator(context)
-        cameraProvider.unbindAll() // stop using camera
     }//use camera
+
+    fun stopUsingCamera(){
+        cameraProvider.unbindAll() // stop using camera
+    }
 }

@@ -18,17 +18,17 @@ import android.util.Log
 import androidx.core.graphics.set
 import java.io.File
 
-class ImageManipulator(context: Context) {
+class ImageManipulator(private val context: Context) {
 
     //private var handler: Handler
     //private var handlerThread: HandlerThread = HandlerThread("imagemanipulatiopthread")
-    private var fileHandler: FileHandler
+    private lateinit var fileHandler: FileHandler
     private var amountOfFiles = 0
     //private var fileNumber = 0
     private var bitmapBase: Bitmap? = null
     private var files: Array<File>? = null
 
-    init {
+    fun manipulate(){
         /*
         handlerThread.start()
         handler = Handler(
@@ -54,6 +54,7 @@ class ImageManipulator(context: Context) {
         }*/
             var bitmap: Bitmap?
             if (files != null && files!!.isNotEmpty()) {
+                Log.i(MyApplication.tagForTesting,"need to get bitmap")
                 bitmap = fileHandler.getBitmap(files!![0])
                 if(bitmap != null) {
                     createEmptyBitmap(bitmap)
@@ -77,8 +78,11 @@ class ImageManipulator(context: Context) {
                 " amount of files: ${fileHandler.getAmountOfFilesInTemporaryPhotos()}"
             )
             //stopBackgroundThread()
-            CameraService.stopService()
-
+            CameraService.isBusy = false
+            Log.i(MyApplication.tagForTesting,"is activity showing: ${CameraService.recordingActivityShowing}")
+            if(!CameraService.recordingActivityShowing) {
+                CameraService.stopService()
+            }
     }
 
     //https://stackoverflow.com/questions/5663671/creating-an-empty-bitmap-and-drawing-though-canvas-in-android

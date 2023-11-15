@@ -53,7 +53,9 @@ class ImageGalleryActivity : ComponentActivity() {
                     }
                 }
             }
-            galleryRecyclerViewAdapter.notifyDataSetChanged()
+            runOnUiThread {
+                galleryRecyclerViewAdapter.notifyDataSetChanged()
+            }
         }.start()
     }
 

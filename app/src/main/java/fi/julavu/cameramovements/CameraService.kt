@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -17,6 +18,8 @@ class CameraService: LifecycleService() {
     companion object{
         lateinit var instance: CameraService
         var isServiceStarted = false
+        var recordingActivityShowing = true
+        var isBusy = false
 
         fun stopService(){
             instance.stopSelf()
@@ -28,6 +31,11 @@ class CameraService: LifecycleService() {
     }
 
     private lateinit var cameraHandler: CameraHandler
+    private val binder = CameraBinder()
+
+    inner class CameraBinder : Binder(){
+        fun getService(): CameraService = this@CameraService
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -42,7 +50,6 @@ class CameraService: LifecycleService() {
         CoroutineScope(Dispatchers.Main).launch {
             cameraHandler.getSettings()
             cameraHandler.prepareCamera()
-            cameraHandler.useCamera()
 
         }
         return START_STICKY //IS THIS BEST OPTION, NEED TO REVISIT THIS
@@ -50,13 +57,18 @@ class CameraService: LifecycleService() {
 
     override fun onDestroy() {
         super.onDestroy()
+        cameraHandler.stopUsingCamera()
         isServiceStarted = false
         Log.i(MyApplication.tagForTesting, "service on destroy")
     }
 
-    override fun onBind(intent: Intent): IBinder? {
+    fun takePhotos(){
+        cameraHandler.useCamera()
+    }
+
+    override fun onBind(intent: Intent): IBinder {
         super.onBind(intent)
-        return null
+        return binder
     }
 
     private fun startServiceForeground(){

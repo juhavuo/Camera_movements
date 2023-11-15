@@ -207,12 +207,13 @@ class FileHandler(private val context: Context) {
     }
 
     fun getBitmap(sourceFile: File): Bitmap?{
-        val bitmap: Bitmap? = null
+        var bitmap: Bitmap? = null
         try {
-            BitmapFactory.decodeFile(sourceFile.absolutePath)
+            bitmap = BitmapFactory.decodeFile(sourceFile.absolutePath)
         }catch (e: Exception){
             Log.e(MyApplication.tagForTesting,"in getBitmap, Filehandler: $e")
         }
+
         return bitmap
     }
 
