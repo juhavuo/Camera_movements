@@ -1,14 +1,18 @@
 package fi.julavu.cameramovements
 
+import android.app.Activity
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 
-class GalleryRecyclerViewAdapter(private val imageInfoList: ArrayList<ImageInfoForGallery>): RecyclerView.Adapter<GalleryRecyclerViewAdapter.ViewHolder>() {
+class GalleryRecyclerViewAdapter(private val activity: FragmentActivity, private val imageInfoList: ArrayList<ImageInfoForGallery>): RecyclerView.Adapter<GalleryRecyclerViewAdapter.ViewHolder>() {
+
+    private val tagForDialogFragment = "imageDialogFragment"
 
     class ViewHolder(view: View): RecyclerView.ViewHolder(view){
         val title = view.findViewById<TextView>(R.id.gallery_recycler_view_row_title)
@@ -27,7 +31,8 @@ class GalleryRecyclerViewAdapter(private val imageInfoList: ArrayList<ImageInfoF
         holder.thumbnail.setImageBitmap(imageInfoList[position].thumbnail)
         holder.thumbnail.setOnClickListener {
             Log.i(MyApplication.tagForTesting,"image at $position clicked")
+            val imageDialogFragment = ImageDialogFragment.newInstance(imageInfoList[position].name)
+            imageDialogFragment.show(activity.supportFragmentManager,tagForDialogFragment)
         }
-
     }
 }

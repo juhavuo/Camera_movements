@@ -7,11 +7,12 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.LinearLayout
 import androidx.activity.ComponentActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.File
 
-class ImageGalleryActivity : ComponentActivity() {
+class ImageGalleryActivity : FragmentActivity() {
 
     private lateinit var fileHandler: FileHandler
     private val imageInfoList: ArrayList<ImageInfoForGallery> = ArrayList()
@@ -33,12 +34,12 @@ class ImageGalleryActivity : ComponentActivity() {
 
         val linearLayoutManager = LinearLayoutManager(this)
         recyclerView.layoutManager = linearLayoutManager
-        val galleryRecyclerViewAdapter = GalleryRecyclerViewAdapter(imageInfoList)
+        val galleryRecyclerViewAdapter = GalleryRecyclerViewAdapter(this,imageInfoList)
         recyclerView.adapter = galleryRecyclerViewAdapter
 
         Thread {
             val files: Array<File>? = fileHandler.getImageFilesFromExternalStorage(FileHandler.externalImageFolderName)
-            val fileWidth = 64
+            val fileWidth = 200
             var thumbnail: Bitmap?
             if (files != null) {
                 for (i in files.indices) {

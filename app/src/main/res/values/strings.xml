@@ -16,6 +16,9 @@
     <string name="recording_activity_title">Record</string>
     <string name="recording_activity_start">Start</string>
     <string name="recording_activity_stop">Stop service</string>
+    <string name="image_gallery_thumbnail_description">Thumbnail of end product image</string>
+    <string name="image_fragment_image_description">End product of image manipulation</string>
+    <string name="image_fragment_close_description">Close</string>
     <string name="notification_channel_title">Camera Movements</string>
     <string name="notification_channel_name">CameraMovementsChannel</string>
     <string name="notification_channel_description">For use of camera</string>
