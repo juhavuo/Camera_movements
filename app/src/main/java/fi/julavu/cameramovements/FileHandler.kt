@@ -45,7 +45,7 @@ class FileHandler(private val context: Context) {
         folderForTemporaryPhotos.mkdir()
     }
 
-    private fun getExternalStoragePath(externalFolderName: String): File = File(Environment.getExternalStoragePublicDirectory(usedDirectory),externalFolderName)
+    fun getExternalStoragePath(externalFolderName: String): File = File(Environment.getExternalStoragePublicDirectory(usedDirectory),externalFolderName)
 
     fun createFolderInExternalStorage(externalFolderName: String): Boolean{
         var succeeded = false

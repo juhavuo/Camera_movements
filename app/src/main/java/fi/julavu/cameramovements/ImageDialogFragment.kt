@@ -8,6 +8,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
+import java.io.File
 
 class ImageDialogFragment: DialogFragment() {
 
@@ -34,9 +35,14 @@ class ImageDialogFragment: DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val imageView = view.findViewById<ImageView>(R.id.fragment_image_image_view)
-        val fileHandler = FileHandler(requireContext())
+        val context = requireContext()
+        val fileHandler = FileHandler(context)
         Thread{
-
+            val imageFile = File(fileHandler.getExternalStoragePath(FileHandler.externalImageFolderName),fileName)
+            val bitmap = fileHandler.getBitmap(imageFile)
+            activity?.runOnUiThread {
+                imageView.setImageBitmap(bitmap)
+            }
         }.start()
         val closeButton = view.findViewById<ImageButton>(R.id.fragment_image_close_button)
         closeButton.setOnClickListener {
