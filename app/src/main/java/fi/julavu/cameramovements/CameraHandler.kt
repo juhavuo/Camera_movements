@@ -114,14 +114,20 @@ class CameraHandler(private val context: Context) {
     fun useCamera(fileName: String) {
         Log.i(MyApplication.tagForTesting, "useCamera")
 
-        val dataForWorker = Data.Builder().putString(MyApplication.fileNameTagForWorker,fileName).build()
+        val internalFolderName = "photos${System.currentTimeMillis()}"
+        fileHandler.createFolderForTemporaryPhotos(internalFolderName)
+
+        val dataForWorker = Data.Builder()
+            .putString(MyApplication.fileNameTagForWorker,fileName)
+            .putString(MyApplication.internalFolderNameTagForWorker,internalFolderName)
+            .build()
 
         var outputFileOptions: OutputFileOptions
         Log.i(MyApplication.tagForTesting, "amount of photos: $amountOfPhotos")
         for (i in 0 until amountOfPhotos) {
             Log.i(MyApplication.tagForTesting, "photo number: $i")
             outputFileOptions =
-                OutputFileOptions.Builder(fileHandler.getFileFromInternalStorage(i)).build()
+                OutputFileOptions.Builder(fileHandler.getFileFromInternalStorage(i,internalFolderName)).build()
             imageCapture.takePicture(outputFileOptions, cameraExecutor,
                 object : ImageCapture.OnImageSavedCallback {
                     override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {

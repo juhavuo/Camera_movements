@@ -35,8 +35,13 @@ class ImageManipulatorWorker(c: Context, workerParameters: WorkerParameters): Wo
             fileName = ""
         }
 
+        var internalFolderName = inputData.getString(MyApplication.internalFolderNameTagForWorker)
+        if(internalFolderName == null){
+            internalFolderName = ""
+        }
+
         fileHandler = FileHandler(context)
-            files = fileHandler.getTemporaryPhotoFiles()
+            files = fileHandler.getTemporaryPhotoFiles(internalFolderName)
 
             if (files != null) {
                 amountOfFiles = files!!.size
@@ -68,10 +73,10 @@ class ImageManipulatorWorker(c: Context, workerParameters: WorkerParameters): Wo
                 Log.i(MyApplication.tagForTesting,"bitMapBase is null")
                 return Result.failure()
             }
-            fileHandler.deleteImagesFromTemporaryStorage()
+            fileHandler.deleteImagesFromTemporaryStorage(internalFolderName)
             Log.i(
                 MyApplication.tagForTesting,
-                " amount of files: ${fileHandler.getAmountOfFilesInTemporaryPhotos()}"
+                " amount of files: ${fileHandler.getAmountOfFilesInTemporaryPhotos(internalFolderName)}"
             )
 
             Log.i(MyApplication.tagForTesting,"end of image handling")

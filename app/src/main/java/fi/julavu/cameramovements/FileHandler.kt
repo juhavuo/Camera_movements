@@ -24,7 +24,7 @@ import kotlin.math.roundToInt
 class FileHandler(private val context: Context) {
 
     private val usedDirectory = Environment.DIRECTORY_PICTURES
-    private val nameOfInternalFolder = "temporaryphotos"
+    //private val nameOfInternalFolder = "temporaryphotos"
     private var fileNumber = 0
     private val fileNameStart = "temp"
     private val fileType = ".jpg"
@@ -38,8 +38,9 @@ class FileHandler(private val context: Context) {
     /**
      * Create folder in internal storage.
      */
-    fun createFolderForTemporaryPhotos(){
-        val folderForTemporaryPhotos = context.getDir(nameOfInternalFolder,Context.MODE_PRIVATE)
+    fun createFolderForTemporaryPhotos(internalFolder: String) {
+
+        val folderForTemporaryPhotos = context.getDir(internalFolder,Context.MODE_PRIVATE)
         folderForTemporaryPhotos.mkdir()
     }
 
@@ -61,8 +62,8 @@ class FileHandler(private val context: Context) {
         Get Files from tempory storage. If directory doesn't exist (that should not happen),
         function returns null
      */
-    fun getTemporaryPhotoFiles():Array<File>?{
-        val folderForTemporaryPhotos = context.getDir(nameOfInternalFolder,Context.MODE_PRIVATE)
+    fun getTemporaryPhotoFiles(internalFolder: String):Array<File>?{
+        val folderForTemporaryPhotos = context.getDir(internalFolder,Context.MODE_PRIVATE)
         return if(folderForTemporaryPhotos.exists()){
             folderForTemporaryPhotos.listFiles()
         }else{
@@ -82,8 +83,8 @@ class FileHandler(private val context: Context) {
         }
     }
 
-    fun getAmountOfFilesInTemporaryPhotos(): Int{
-        val files = getTemporaryPhotoFiles()
+    fun getAmountOfFilesInTemporaryPhotos(internalFolder: String): Int{
+        val files = getTemporaryPhotoFiles(internalFolder)
         return files?.size ?: 0
     }
 
@@ -109,8 +110,8 @@ class FileHandler(private val context: Context) {
         return isSaved
     }
 
-    fun getFileFromInternalStorage(number: Int): File{
-        val folderForTemporaryPhotos = context.getDir(nameOfInternalFolder,Context.MODE_PRIVATE)
+    fun getFileFromInternalStorage(number: Int, internalFolder: String): File{
+        val folderForTemporaryPhotos = context.getDir(internalFolder,Context.MODE_PRIVATE)
         return File(folderForTemporaryPhotos,"$fileNameStart$number$fileType")
 
     }
@@ -118,8 +119,8 @@ class FileHandler(private val context: Context) {
     /**
      * The file is saved as temp{number}.jpg to internal storage
      */
-    fun saveImageToTemporaryStorage(image: Image){
-            val folderForTemporaryPhotos = context.getDir(nameOfInternalFolder,Context.MODE_PRIVATE)
+    fun saveImageToTemporaryStorage(image: Image, internalFolder: String){
+            val folderForTemporaryPhotos = context.getDir(internalFolder,Context.MODE_PRIVATE)
             val file = File(folderForTemporaryPhotos,"$fileNameStart$fileNumber$fileType")
             //Log.i(MyApplication.tagForTesting,"name: ${file.name} path: ${file.path}")
             //https://stackoverflow.com/questions/41775968/how-to-convert-android-media-image-to-bitmap-object
@@ -158,8 +159,8 @@ class FileHandler(private val context: Context) {
         Deletes all files from temporary storage. This used after image operations are done to
         save space.
      */
-    fun deleteImagesFromTemporaryStorage(){
-       val files = getTemporaryPhotoFiles()
+    fun deleteImagesFromTemporaryStorage(internalFolder: String){
+       val files = getTemporaryPhotoFiles(internalFolder)
         if(files != null){
             for(file in files){
                 file.delete()
