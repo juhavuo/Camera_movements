@@ -1,10 +1,14 @@
 package fi.julavu.cameramovements
 
+/**
+ * Tags used in multiple diferent classes.
+ *
+ * Juha Vuokko
+ */
 class MyApplication {
 
     companion object{
-        const val notificationId = 3003
-        const val channelId = "CameraMovementsChannel"
+        const val fileNameTagForWorker = "file_name"
         const val tagForTesting = "cameramovements_testing"
     }
 }

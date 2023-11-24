@@ -22,21 +22,18 @@ import java.io.File
 
 class ImageManipulatorWorker(c: Context, workerParameters: WorkerParameters): Worker(c, workerParameters) {
 
-    //private var handler: Handler
-    //private var handlerThread: HandlerThread = HandlerThread("imagemanipulatiopthread")
     private lateinit var fileHandler: FileHandler
     private val context = c
     private var amountOfFiles = 0
-    //private var fileNumber = 0
     private var bitmapBase: Bitmap? = null
     private var files: Array<File>? = null
 
     override fun doWork(): Result {
-        /*
-        handlerThread.start()
-        handler = Handler(
-            handlerThread.looper
-        )*/
+
+        var fileName = inputData.getString(MyApplication.fileNameTagForWorker)
+        if (fileName == null){
+            fileName = ""
+        }
 
         fileHandler = FileHandler(context)
             files = fileHandler.getTemporaryPhotoFiles()
@@ -49,12 +46,7 @@ class ImageManipulatorWorker(c: Context, workerParameters: WorkerParameters): Wo
             }
         val directoryCreated = fileHandler.createFolderInExternalStorage(FileHandler.externalImageFolderName)
         Log.i(MyApplication.tagForTesting, "external directory created $directoryCreated")
-            /*
-        if(files != null) {
-            for (file in files!!) {
-                Log.i(MyApplication.tagForTesting,"filename: ${file.name} filesize: ${file.freeSpace}")
-            }
-        }*/
+
             var bitmap: Bitmap?
             if (files != null && files!!.isNotEmpty()) {
                 Log.i(MyApplication.tagForTesting,"need to get bitmap")
@@ -71,9 +63,9 @@ class ImageManipulatorWorker(c: Context, workerParameters: WorkerParameters): Wo
                 }
             }
             if (bitmapBase != null) {
-                fileHandler.saveToExternalStorage(bitmapBase!!, FileHandler.externalImageFolderName)
+                fileHandler.saveToExternalStorage(bitmapBase!!, FileHandler.externalImageFolderName, fileName)
             }else{
-                Log.i(MyApplication.tagForTesting,"bitmapbase is null")
+                Log.i(MyApplication.tagForTesting,"bitMapBase is null")
                 return Result.failure()
             }
             fileHandler.deleteImagesFromTemporaryStorage()
@@ -81,9 +73,8 @@ class ImageManipulatorWorker(c: Context, workerParameters: WorkerParameters): Wo
                 MyApplication.tagForTesting,
                 " amount of files: ${fileHandler.getAmountOfFilesInTemporaryPhotos()}"
             )
-            //stopBackgroundThread()
-            CameraService.isBusy = false
-            Log.i(MyApplication.tagForTesting,"is activity showing: ${CameraService.recordingActivityShowing}")
+
+            Log.i(MyApplication.tagForTesting,"end of image handling")
 
         return Result.success()
     }
@@ -117,14 +108,8 @@ class ImageManipulatorWorker(c: Context, workerParameters: WorkerParameters): Wo
                     bAdd = Color.blue(pixel)/amountOfFiles
 
                     bitmapBase!![x, y] = Color.rgb(r+rAdd,g+gAdd,b+bAdd)
-                }
-            }
-        }
-    }
-
-    /*
-    private fun stopBackgroundThread() {
-        handlerThread.quitSafely()
-        handlerThread.join()
-    }*/
+                }//for(y...
+            }//for(x...)
+        }//if(bitmapBase != null)
+    }//fun addBitmapToBase
 }

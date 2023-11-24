@@ -1,3 +1,11 @@
+/**
+ * Main activity. One can go to RecordingActivity where one can start taking photos. One can go to
+ * to ImageGalleryActivity, where one can view end results. Settings for taking photos are accessed
+ * from Recording activity. If there would be app level settings it could be added to MainActivity.
+ *
+ * Juha Vuokko
+ */
+
 package fi.julavu.cameramovements
 
 import android.content.Intent

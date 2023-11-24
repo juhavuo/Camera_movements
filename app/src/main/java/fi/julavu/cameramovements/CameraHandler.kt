@@ -18,27 +18,32 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
 import androidx.camera.core.ImageCapture.OutputFileOptions
 import androidx.camera.core.ImageCaptureException
-import androidx.camera.core.impl.ImageCaptureConfig
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 class CameraHandler(private val context: Context) {
 
     private lateinit var dataStoreHandler: DataStoreHandler
-    private lateinit var imageManipulator: ImageManipulator
     private lateinit var imageCapture: ImageCapture
     private val fileHandler = FileHandler(context)
-    private lateinit var imageCaptureConfig: ImageCaptureConfig
     private lateinit var cameraProvider: ProcessCameraProvider
     private lateinit var cameraExecutor: Executor
     private lateinit var camera: Camera
     private var amountOfPhotos = 0
     private var outputSize = Size(720, 480)
+    private lateinit var workManager: WorkManager
 
     companion object {
+        /**
+         * Returns all image sizes as arraylist.
+         */
         fun getSizes(context: Context): ArrayList<Size> {
             val sizes = ArrayList<Size>()
             val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
@@ -52,9 +57,11 @@ class CameraHandler(private val context: Context) {
             }
             return sizes
         }
-
     }
 
+    /**
+     * Get setting data from DataStore.
+     */
     suspend fun getSettings() {
         dataStoreHandler = DataStoreHandler.getInstance(context)
         val amountSettingsData =
@@ -62,16 +69,21 @@ class CameraHandler(private val context: Context) {
         amountOfPhotos = dataStoreHandler.getSeekbarProgressValue(amountSettingsData)
         val sizes = getSizes(context)
         outputSize = sizes[dataStoreHandler.getImageSizeIndex()]
-        Log.i(MyApplication.tagForTesting, "getsettings: $amountOfPhotos")
+        Log.i(MyApplication.tagForTesting, "get settings: $amountOfPhotos")
     }
 
+    /**
+     * Prepare camera. This function is good to run at onCreate when using. Don't know
+     * how much time is needed after this before camera is ready for taking images.
+     */
     fun prepareCamera() {
 
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+        workManager = WorkManager.getInstance(context)
 
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProvider = cameraProviderFuture.get()
 
-        cameraProviderFuture.addListener(Runnable {
+        cameraProviderFuture.addListener( {
 
             val cameraSelector = CameraSelector.Builder()
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK)
@@ -89,30 +101,35 @@ class CameraHandler(private val context: Context) {
                     cameraSelector,
                     imageCapture
                 )
-
             Log.i(MyApplication.tagForTesting, "prepareCamera")
 
         },ContextCompat.getMainExecutor(context))
 
     }
 
-    fun useCamera() {
+    /**
+     * This is for taking images. All taken images are first saved to temporary storage and after
+     * this is done ImageManipulatorWorker is started in background.
+     */
+    fun useCamera(fileName: String) {
         Log.i(MyApplication.tagForTesting, "useCamera")
-        CameraService.isBusy = true
+
+        val dataForWorker = Data.Builder().putString(MyApplication.fileNameTagForWorker,fileName).build()
+
         var outputFileOptions: OutputFileOptions
         Log.i(MyApplication.tagForTesting, "amount of photos: $amountOfPhotos")
         for (i in 0 until amountOfPhotos) {
             Log.i(MyApplication.tagForTesting, "photo number: $i")
             outputFileOptions =
                 OutputFileOptions.Builder(fileHandler.getFileFromInternalStorage(i)).build()
-            imageCapture.takePicture(outputFileOptions, cameraExecutor!!,
+            imageCapture.takePicture(outputFileOptions, cameraExecutor,
                 object : ImageCapture.OnImageSavedCallback {
                     override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                         val uri = outputFileResults.savedUri
                         Log.i(MyApplication.tagForTesting, "onImageSaved $uri")
                         if(i == amountOfPhotos-1){
-                            imageManipulator = ImageManipulator(context)
-                            imageManipulator.manipulate()
+                            val imageManipulationRequest: WorkRequest = OneTimeWorkRequestBuilder<ImageManipulatorWorker>().setInputData(dataForWorker).build()
+                            workManager.enqueue(imageManipulationRequest)
                         }
                     }
 

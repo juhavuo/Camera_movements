@@ -12,9 +12,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.Image
-import android.net.Uri
 import android.os.Environment
-import android.provider.MediaStore
 import android.util.Log
 import java.io.File
 import java.io.FileOutputStream
@@ -27,7 +25,6 @@ class FileHandler(private val context: Context) {
 
     private val usedDirectory = Environment.DIRECTORY_PICTURES
     private val nameOfInternalFolder = "temporaryphotos"
-
     private var fileNumber = 0
     private val fileNameStart = "temp"
     private val fileType = ".jpg"
@@ -35,6 +32,7 @@ class FileHandler(private val context: Context) {
     companion object{
         const val externalImageFolderName = "CameraMovementsImages"
         const val nameOfFolderForPhotoSamples ="CameraMovementsTesting" //for checking that camera works correctly
+
     }
 
     /**
@@ -135,7 +133,7 @@ class FileHandler(private val context: Context) {
                 ++fileNumber
             }
     }
-
+/*
     fun saveImageToTemporaryStorage(image: Image, alsoToExternal: Boolean, externalFolderName: String){
         val folderForTemporaryPhotos = context.getDir(nameOfInternalFolder,Context.MODE_PRIVATE)
         val file = File(folderForTemporaryPhotos,"$fileNameStart$fileNumber$fileType")
@@ -146,20 +144,6 @@ class FileHandler(private val context: Context) {
         byteBuffer.get(bytes)
         //Log.i(MyApplication.tagForTesting, "bytes size: $bytes")
         val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, null)
-        val isSaved = saveImageToFolder(bitmap,file)
-        if(alsoToExternal){
-            Log.i(MyApplication.tagForTesting,"time to save photo to external storage")
-            saveToExternalStorage(bitmap, externalFolderName)
-        }
-        if(isSaved) {
-            ++fileNumber
-        }
-    }
-/*
-    fun saveImageToTemporaryStorage(uri: Uri, alsoToExternal: Boolean, externalFolderName: String){
-        //Log.i(MyApplication.tagForTesting,"name: ${file.name} path: ${file.path}")
-        //https://stackoverflow.com/questions/41775968/how-to-convert-android-media-image-to-bitmap-object
-        val bitmap =
         val isSaved = saveImageToFolder(bitmap,file)
         if(alsoToExternal){
             Log.i(MyApplication.tagForTesting,"time to save photo to external storage")
@@ -186,8 +170,12 @@ class FileHandler(private val context: Context) {
     /**
      * Save file as image{timestamp}.jpg and image name is given as return value
      */
-    fun saveToExternalStorage(bitmap: Bitmap, externalFolderName: String): String{
-        val imageName = "image${System.currentTimeMillis()}.jpg"
+    fun saveToExternalStorage(bitmap: Bitmap, externalFolderName: String, givenName: String): String{
+        var imageName = givenName
+
+        if(imageName.isBlank()) {
+            imageName = "image${System.currentTimeMillis()}.jpg"
+        }
         val externalDir = getExternalStoragePath(externalFolderName)
         val imageFile = File(externalDir,imageName)
         val isSaved = saveImageToFolder(bitmap,imageFile)
@@ -201,10 +189,11 @@ class FileHandler(private val context: Context) {
      * Change file name in external storage.
      */
     //https://mkyong.com/java/how-to-rename-file-in-java/
+    /*
     fun renameSavedFile(fileName: String){
         val externalPath = getExternalStoragePath(externalImageFolderName).toPath()
         Files.move(externalPath,externalPath.resolveSibling("$fileName$fileType"))
-    }
+    }*/
 
     fun getBitmap(sourceFile: File): Bitmap?{
         var bitmap: Bitmap? = null
@@ -229,4 +218,11 @@ class FileHandler(private val context: Context) {
             Bitmap.createScaledBitmap(bitmap, thumbnailWidth, thumbnailHeight, false)
         } else null
     }
+
+    fun checkIfFileExists(fName: String): Boolean{
+        val fileName = "$fName.jpg"
+        val fileToCheck = File(getExternalStoragePath(externalImageFolderName),fileName)
+        return fileToCheck.exists()
+    }
+
 }
