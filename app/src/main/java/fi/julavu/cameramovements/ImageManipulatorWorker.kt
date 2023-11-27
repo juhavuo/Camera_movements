@@ -40,6 +40,9 @@ class ImageManipulatorWorker(c: Context, workerParameters: WorkerParameters): Wo
             internalFolderName = ""
         }
 
+        var pixelSize = inputData.getInt(MyApplication.pixelSizeTagForWorker,1)
+        Log.i(MyApplication.tagForTesting,"pixel size: $pixelSize")
+
         fileHandler = FileHandler(context)
             files = fileHandler.getTemporaryPhotoFiles(internalFolderName)
 
@@ -58,11 +61,11 @@ class ImageManipulatorWorker(c: Context, workerParameters: WorkerParameters): Wo
                 bitmap = fileHandler.getBitmap(files!![0])
                 if(bitmap != null) {
                     createEmptyBitmap(bitmap)
-                    addBitmapToBase(bitmap)
+                    addBitmapToBase(bitmap,pixelSize)
                     for (i in 1 until files!!.size) {
                         bitmap = fileHandler.getBitmap(files!![i])
                         if(bitmap != null) {
-                            addBitmapToBase(bitmap)
+                            addBitmapToBase(bitmap,pixelSize)
                         }
                     }
                 }
@@ -92,27 +95,46 @@ class ImageManipulatorWorker(c: Context, workerParameters: WorkerParameters): Wo
         bitmapBase = Bitmap.createBitmap(width,height,conf)
     }
 
-    private fun addBitmapToBase(bm: Bitmap){
+    private fun addBitmapToBase(bm: Bitmap, pixelSize: Int){
         if(bitmapBase != null){
             var r: Int
             var g: Int
             var b: Int
-            var rAdd: Int
-            var gAdd: Int
-            var bAdd: Int
             var pixel: Int
-            for(x in 0 until bitmapBase!!.width){
-                for(y in 0 until bitmapBase!!.height){
-                    pixel = bitmapBase!!.getPixel(x,y)
-                    r = Color.red(pixel)
-                    g = Color.green(pixel)
-                    b = Color.blue(pixel)
-                    pixel = bm.getPixel(x,y)
-                    rAdd = Color.red(pixel)/amountOfFiles
-                    gAdd = Color.green(pixel)/amountOfFiles
-                    bAdd = Color.blue(pixel)/amountOfFiles
+            var pixel2: Int
+            var pixel3: Int
+            var pixel4: Int
+            var pixelBM: Int
+            var pixelBM2: Int
+            var pixelBM3: Int
+            var pixelBM4: Int
 
-                    bitmapBase!![x, y] = Color.rgb(r+rAdd,g+gAdd,b+bAdd)
+            for(x in 0 until bitmapBase!!.width-pixelSize step pixelSize){
+                for(y in 0 until bitmapBase!!.height-pixelSize step pixelSize){
+                    if(pixelSize < 3) {
+                        pixel = bitmapBase!!.getPixel(x, y)
+                        pixelBM = bm.getPixel(x,y)
+                        r = Color.red(pixel)+Color.red(pixelBM)/amountOfFiles
+                        g = Color.green(pixel)+Color.green(pixelBM)/amountOfFiles
+                        b = Color.blue(pixel)+Color.blue(pixelBM)/amountOfFiles
+                    }else{
+                        pixel = bitmapBase!!.getPixel(x, y)
+                        pixel2 = bitmapBase!!.getPixel(x+pixelSize-1, y)
+                        pixel3 = bitmapBase!!.getPixel(x, y+pixelSize-1)
+                        pixel4 = bitmapBase!!.getPixel(x+pixelSize-1, y+pixelSize-1)
+                        pixelBM= bm.getPixel(x,y)
+                        pixelBM2=bm.getPixel(x+pixelSize-1,y)
+                        pixelBM3=bm.getPixel(x,y+pixelSize-1)
+                        pixelBM4=bm.getPixel(x+pixelSize-1,y+pixelSize-1)
+                        r = (Color.red(pixel)+Color.red(pixel2)+Color.red(pixel3)+Color.red(pixel4))/4
+                        +(Color.red(pixelBM)+Color.red(pixelBM2)+Color.red(pixelBM3)+Color.red(pixelBM4))/(4*amountOfFiles)
+                        g = (Color.green(pixel)+Color.green(pixel2)+Color.green(pixel3)+Color.green(pixel4))/4
+                        +(Color.green(pixelBM)+Color.green(pixelBM2)+Color.green(pixelBM3)+Color.green(pixelBM4))/(4*amountOfFiles)
+                        b = (Color.blue(pixel)+Color.blue(pixel2)+Color.blue(pixel3)+Color.blue(pixel4))/4
+                        +(Color.blue(pixelBM)+Color.blue(pixelBM2)+Color.blue(pixelBM3)+Color.blue(pixelBM4))/(4*amountOfFiles)
+                    }
+                    bitmapBase!![x, y] = Color.rgb(r,g,b)
+
                 }//for(y...
             }//for(x...)
         }//if(bitmapBase != null)

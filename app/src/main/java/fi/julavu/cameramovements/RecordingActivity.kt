@@ -10,6 +10,7 @@ package fi.julavu.cameramovements
 import android.Manifest
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -26,6 +27,8 @@ class RecordingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_recording)
+
+        Log.i(MyApplication.tagForTesting,"recording activity on create")
 
         checkPermissions()
 
@@ -62,6 +65,7 @@ class RecordingActivity : ComponentActivity() {
         settingsButton.setOnClickListener {
             val intent = Intent(this, SettingsActivity::class.java)
             startActivity(intent)
+            finish()
         }
 
         val backButton = findViewById<Button>(R.id.recording_activity_back_button)
@@ -74,6 +78,7 @@ class RecordingActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         cameraHandler.stopUsingCamera()
+        Log.i(MyApplication.tagForTesting,"recording activity, on destroy")
     }
 
     private fun checkPermissions(){

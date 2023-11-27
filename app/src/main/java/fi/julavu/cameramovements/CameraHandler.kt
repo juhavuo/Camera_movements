@@ -37,6 +37,7 @@ class CameraHandler(private val context: Context) {
     private lateinit var cameraExecutor: Executor
     private lateinit var camera: Camera
     private var amountOfPhotos = 0
+    private var pixelSize = 1
     private var outputSize = Size(720, 480)
     private lateinit var workManager: WorkManager
 
@@ -67,6 +68,10 @@ class CameraHandler(private val context: Context) {
         val amountSettingsData =
             SettingsData.getSettingsData(context, R.string.for_amount_of_photos_seekbar)
         amountOfPhotos = dataStoreHandler.getSeekbarProgressValue(amountSettingsData)
+        val pixelSizeSettingsData =
+            SettingsData.getSettingsData(context, R.string.for_pixel_size_seekbar)
+        pixelSize = dataStoreHandler.getSeekbarProgressValue(pixelSizeSettingsData)
+        Log.i(MyApplication.tagForTesting, "camera handler pixel size: $pixelSize")
         val sizes = getSizes(context)
         outputSize = sizes[dataStoreHandler.getImageSizeIndex()]
         Log.i(MyApplication.tagForTesting, "get settings: $amountOfPhotos")
@@ -120,6 +125,7 @@ class CameraHandler(private val context: Context) {
         val dataForWorker = Data.Builder()
             .putString(MyApplication.fileNameTagForWorker,fileName)
             .putString(MyApplication.internalFolderNameTagForWorker,internalFolderName)
+            .putInt(MyApplication.pixelSizeTagForWorker,pixelSize)
             .build()
 
         var outputFileOptions: OutputFileOptions

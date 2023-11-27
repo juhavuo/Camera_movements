@@ -38,6 +38,12 @@
         app:layout_constraintTop_toBottomOf="@id/settings_activity_size_spinner"
         android:id = "@+id/settings_activity_amount_of_images_view"/>
 
+    <include layout="@layout/settings_seekbar"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:id= "@+id/settings_activity_pixel_size_spinner"
+        app:layout_constraintTop_toBottomOf="@id/settings_activity_amount_of_images_view"/>
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -57,7 +63,5 @@
         android:layout_marginStart="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

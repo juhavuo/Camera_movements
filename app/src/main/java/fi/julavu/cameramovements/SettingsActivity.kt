@@ -45,7 +45,6 @@ class SettingsActivity : ComponentActivity() {
         if (sizes.size == 1) {
             defaultSize = 0
         }
-
         sizesSpinner = findViewById(R.id.settings_activity_size_spinner)
         val sizesSpinnerAdapter =
             ArrayAdapter(this, android.R.layout.simple_spinner_item, sizesListedForSpinner)
@@ -54,6 +53,11 @@ class SettingsActivity : ComponentActivity() {
         val amountOfPhotosSettings =
             SettingsData.getSettingsData(this, R.string.for_amount_of_photos_seekbar)
         setupSeekbar(R.id.settings_activity_amount_of_images_view, amountOfPhotosSettings)
+
+        val pixelSizeSettings =
+            SettingsData.getSettingsData(this, R.string.for_pixel_size_seekbar)
+        setupSeekbar(R.id.settings_activity_pixel_size_spinner, pixelSizeSettings)
+
         CoroutineScope(Dispatchers.Main).launch {
 
             //when saved data is changed
@@ -92,14 +96,17 @@ class SettingsActivity : ComponentActivity() {
 
         val saveButton = findViewById<Button>(R.id.settings_activity_save_and_quit_button)
         saveButton.setOnClickListener {
-            saveAllSettings()
-            goBackToRecording()
+            saveAllSettingsAndGoBack()
         }
 
         val cancelButton = findViewById<Button>(R.id.settings_activity_cancel_button)
         cancelButton.setOnClickListener {
             goBackToRecording()
         }
+    }
+
+    override fun onBackPressed() {
+        goBackToRecording()
     }
 
     /*
@@ -133,10 +140,11 @@ class SettingsActivity : ComponentActivity() {
     /*
         If save settings is pressed, all the current values are saved to dataStore.
      */
-    private fun saveAllSettings() {
+    private fun saveAllSettingsAndGoBack() {
         CoroutineScope(Dispatchers.Main).launch {
             dataStoreHandler.writeSeekbarProgressValues(settingsDataList)
             dataStoreHandler.writeImageSize(sizesSpinner.selectedItemPosition)
+            goBackToRecording()
         }
     }
 

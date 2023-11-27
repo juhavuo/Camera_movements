@@ -24,7 +24,6 @@ import kotlin.math.roundToInt
 class FileHandler(private val context: Context) {
 
     private val usedDirectory = Environment.DIRECTORY_PICTURES
-    //private val nameOfInternalFolder = "temporaryphotos"
     private var fileNumber = 0
     private val fileNameStart = "temp"
     private val fileType = ".jpg"
@@ -174,7 +173,7 @@ class FileHandler(private val context: Context) {
     fun saveToExternalStorage(bitmap: Bitmap, externalFolderName: String, givenName: String): String{
         var imageName = givenName
 
-        if(imageName.isBlank()) {
+        if(imageName.length <=4) {
             imageName = "image${System.currentTimeMillis()}.jpg"
         }
         val externalDir = getExternalStoragePath(externalFolderName)
