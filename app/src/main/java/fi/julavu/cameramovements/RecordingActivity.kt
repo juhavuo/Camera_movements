@@ -70,9 +70,18 @@ class RecordingActivity : ComponentActivity() {
 
         val backButton = findViewById<Button>(R.id.recording_activity_back_button)
         backButton.setOnClickListener {
-            val intent = Intent(this,MainActivity::class.java)
-            startActivity(intent)
+           backToMain()
         }
+    }
+
+    override fun onBackPressed() {
+        backToMain()
+    }
+
+    private fun backToMain(){
+        val intent = Intent(this,MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+        startActivity(intent)
     }
 
     override fun onDestroy() {

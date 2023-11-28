@@ -111,7 +111,13 @@ class ImageManipulatorWorker(c: Context, workerParameters: WorkerParameters): Wo
 
             for(x in 0 until bitmapBase!!.width-pixelSize step pixelSize){
                 for(y in 0 until bitmapBase!!.height-pixelSize step pixelSize){
-                    if(pixelSize < 3) {
+                    pixel = bitmapBase!!.getPixel(x, y)
+                    pixelBM = bm.getPixel(x,y)
+                    r = Color.red(pixel)+Color.red(pixelBM)/amountOfFiles
+                    g = Color.green(pixel)+Color.green(pixelBM)/amountOfFiles
+                    b = Color.blue(pixel)+Color.blue(pixelBM)/amountOfFiles
+                    /*
+                    if(pixelSize < 30) {
                         pixel = bitmapBase!!.getPixel(x, y)
                         pixelBM = bm.getPixel(x,y)
                         r = Color.red(pixel)+Color.red(pixelBM)/amountOfFiles
@@ -126,13 +132,14 @@ class ImageManipulatorWorker(c: Context, workerParameters: WorkerParameters): Wo
                         pixelBM2=bm.getPixel(x+pixelSize-1,y)
                         pixelBM3=bm.getPixel(x,y+pixelSize-1)
                         pixelBM4=bm.getPixel(x+pixelSize-1,y+pixelSize-1)
+                        Log.i(MyApplication.tagForTesting,"p1: $pixel p2: $pixel2 p3 $pixel3 p4 $pixel4")
                         r = (Color.red(pixel)+Color.red(pixel2)+Color.red(pixel3)+Color.red(pixel4))/4
                         +(Color.red(pixelBM)+Color.red(pixelBM2)+Color.red(pixelBM3)+Color.red(pixelBM4))/(4*amountOfFiles)
                         g = (Color.green(pixel)+Color.green(pixel2)+Color.green(pixel3)+Color.green(pixel4))/4
                         +(Color.green(pixelBM)+Color.green(pixelBM2)+Color.green(pixelBM3)+Color.green(pixelBM4))/(4*amountOfFiles)
                         b = (Color.blue(pixel)+Color.blue(pixel2)+Color.blue(pixel3)+Color.blue(pixel4))/4
                         +(Color.blue(pixelBM)+Color.blue(pixelBM2)+Color.blue(pixelBM3)+Color.blue(pixelBM4))/(4*amountOfFiles)
-                    }
+                    }*/
                     bitmapBase!![x, y] = Color.rgb(r,g,b)
 
                 }//for(y...
