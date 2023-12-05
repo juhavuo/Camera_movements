@@ -4,8 +4,7 @@
  * taken. The idea of separate the take of images and image processing is to make sure that image
  * handling process can not affect the performance of camera.
  *
- * NEEDS SOME KIND OF THREAD HANDLING, NOW EVERYTHING IS DONE IN COROUTINE!!!
- * IS THAT ENOUGH
+ * Image handling is done in background using workmanager.
  *
  * Juha Vuokko
  */
@@ -14,7 +13,6 @@ package fi.julavu.cameramovements
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.drawable.BitmapDrawable
 import android.util.Log
 import androidx.core.graphics.set
 import androidx.work.Worker
@@ -104,6 +102,9 @@ class ImageManipulatorWorker(c: Context, workerParameters: WorkerParameters): Wo
         bitmapBase = Bitmap.createBitmap(width,height,conf)
     }
 
+    /*
+        Combine bitmap to base bitmap.
+     */
     private fun addBitmapToBase(bm: Bitmap){
         if(bitmapBase != null){
             var r: Int

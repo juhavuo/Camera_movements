@@ -59,7 +59,7 @@ class RecordingActivity : ComponentActivity() {
 
         val startButton = findViewById<Button>(R.id.recording_activity_start_button)
         startButton.setOnClickListener {
-            cameraHandler.useCamera(fileNameEditText.text.toString()+".jpg")
+            cameraHandler.useCamera(fileNameEditText.text.toString()+".jpg", this)
         }
         val settingsButton = findViewById<Button>(R.id.recording_activity_settings_button)
         settingsButton.setOnClickListener {

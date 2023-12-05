@@ -6,12 +6,14 @@
 
 package fi.julavu.cameramovements
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.ImageFormat
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.util.Log
 import android.util.Size
+import androidx.activity.ComponentActivity
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -21,10 +23,15 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
@@ -116,7 +123,7 @@ class CameraHandler(private val context: Context) {
      * This is for taking images. All taken images are first saved to temporary storage and after
      * this is done ImageManipulatorWorker is started in background.
      */
-    fun useCamera(fileName: String) {
+    fun useCamera(fileName: String, activity: ComponentActivity) {
         Log.i(MyApplication.tagForTesting, "useCamera")
 
         val internalFolderName = "photos${System.currentTimeMillis()}"
@@ -142,6 +149,14 @@ class CameraHandler(private val context: Context) {
                         if(i == amountOfPhotos-1){
                             val imageManipulationRequest: WorkRequest = OneTimeWorkRequestBuilder<ImageManipulatorWorker>().setInputData(dataForWorker).build()
                             workManager.enqueue(imageManipulationRequest)
+                            GlobalScope.launch(Dispatchers.Main) {
+                                workManager.getWorkInfoByIdLiveData(imageManipulationRequest.id)
+                                    .observe(activity) { workInfo ->
+                                        if (workInfo.state == WorkInfo.State.SUCCEEDED) {
+                                            Log.i(MyApplication.tagForTesting, "work done")
+                                        }
+                                    }
+                            }
                         }
                     }
 
