@@ -11,9 +11,11 @@ package fi.julavu.cameramovements
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.media.Image
 import android.os.Environment
 import android.util.Log
+import androidx.exifinterface.media.ExifInterface
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -199,6 +201,34 @@ class FileHandler(private val context: Context) {
         var bitmap: Bitmap? = null
         try {
             bitmap = BitmapFactory.decodeFile(sourceFile.absolutePath)
+
+        }catch (e: Exception){
+            Log.e(MyApplication.tagForTesting,"in getBitmap, Filehandler: $e")
+        }
+
+        return bitmap
+    }
+
+    fun getBitmapAndRotate(sourceFile: File): Bitmap?{
+        var bitmap: Bitmap? = null
+        try {
+            bitmap = BitmapFactory.decodeFile(sourceFile.absolutePath)
+
+            //https://stackoverflow.com/questions/19753912/set-image-orientation-using-exifinterface
+            //https://stackoverflow.com/questions/63921260/android-camerax-image-rotated
+            val exif = ExifInterface(sourceFile)
+            val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+            var rotate = 0
+            when(orientation){
+                ExifInterface.ORIENTATION_ROTATE_90 -> rotate = 90
+                ExifInterface.ORIENTATION_ROTATE_180 -> rotate = 180
+                ExifInterface.ORIENTATION_ROTATE_270 -> rotate = 270
+            }
+
+            val matrix = Matrix()
+            matrix.postRotate(rotate.toFloat())
+            bitmap = Bitmap.createBitmap(bitmap,0,0,bitmap.width,bitmap.height,matrix,true)
+
         }catch (e: Exception){
             Log.e(MyApplication.tagForTesting,"in getBitmap, Filehandler: $e")
         }

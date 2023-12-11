@@ -20,6 +20,7 @@
     <string name="recording_activity_edit_text_content_description">File name here</string>
     <string name="recording_activity_file_name_ending">.jpg</string>
     <string name="recording_activity_file_exists">File already exists</string>
+    <string name="recording_activity_toast_message">Image handling done</string>
     <string name="image_gallery_thumbnail_description">Thumbnail of end product image</string>
     <string name="gallery_activity_thumbnail_description">Thumbnail, get larger version of image</string>
     <string name="image_fragment_image_description">End product of image manipulation</string>

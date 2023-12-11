@@ -11,6 +11,7 @@ import android.Manifest
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -19,6 +20,7 @@ import androidx.core.widget.doAfterTextChanged
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class RecordingActivity : ComponentActivity() {
 
@@ -34,9 +36,11 @@ class RecordingActivity : ComponentActivity() {
 
         val fileHandler = FileHandler(this)
 
+        val rootView = findViewById<View>(R.id.recording_activity_root_view)
+
         CoroutineScope(Dispatchers.Main).launch {
             cameraHandler.getSettings()
-            cameraHandler.prepareCamera()
+            cameraHandler.prepareCamera(rootView)
         }
 
         val warningsTextview = findViewById<TextView>(R.id.recording_activity_warnings_textview)
@@ -60,6 +64,7 @@ class RecordingActivity : ComponentActivity() {
         val startButton = findViewById<Button>(R.id.recording_activity_start_button)
         startButton.setOnClickListener {
             cameraHandler.useCamera(fileNameEditText.text.toString()+".jpg", this)
+            fileNameEditText.text.clear()
         }
         val settingsButton = findViewById<Button>(R.id.recording_activity_settings_button)
         settingsButton.setOnClickListener {
@@ -74,6 +79,7 @@ class RecordingActivity : ComponentActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         backToMain()
     }

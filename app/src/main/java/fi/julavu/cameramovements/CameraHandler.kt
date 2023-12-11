@@ -11,8 +11,14 @@ import android.content.Context
 import android.graphics.ImageFormat
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
+import android.hardware.display.DisplayManager
+import android.hardware.display.DisplayManager.DisplayListener
 import android.util.Log
 import android.util.Size
+import android.view.OrientationEventListener
+import android.view.Surface
+import android.view.View
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
@@ -23,7 +29,6 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.Observer
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
@@ -88,14 +93,13 @@ class CameraHandler(private val context: Context) {
      * Prepare camera. This function is good to run at onCreate when using. Don't know
      * how much time is needed after this before camera is ready for taking images.
      */
-    fun prepareCamera() {
-
+    fun prepareCamera(rootView: View) {
         workManager = WorkManager.getInstance(context)
 
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProvider = cameraProviderFuture.get()
 
-        cameraProviderFuture.addListener( {
+        cameraProviderFuture.addListener({
 
             val cameraSelector = CameraSelector.Builder()
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK)
@@ -105,6 +109,7 @@ class CameraHandler(private val context: Context) {
                 .setCaptureMode(CAPTURE_MODE_MINIMIZE_LATENCY)
                 .setTargetResolution(outputSize)
                 .build()
+            Log.i(MyApplication.tagForTesting,"rotation: ${rootView.display.rotation}")
             cameraExecutor = Executors.newSingleThreadExecutor()
 
             camera =
@@ -115,8 +120,7 @@ class CameraHandler(private val context: Context) {
                 )
             Log.i(MyApplication.tagForTesting, "prepareCamera")
 
-        },ContextCompat.getMainExecutor(context))
-
+        }, ContextCompat.getMainExecutor(context))
     }
 
     /**
@@ -130,9 +134,9 @@ class CameraHandler(private val context: Context) {
         fileHandler.createFolderForTemporaryPhotos(internalFolderName)
 
         val dataForWorker = Data.Builder()
-            .putString(MyApplication.fileNameTagForWorker,fileName)
-            .putString(MyApplication.internalFolderNameTagForWorker,internalFolderName)
-            .putInt(MyApplication.pixelSizeTagForWorker,pixelSize)
+            .putString(MyApplication.fileNameTagForWorker, fileName)
+            .putString(MyApplication.internalFolderNameTagForWorker, internalFolderName)
+            .putInt(MyApplication.pixelSizeTagForWorker, pixelSize)
             .build()
 
         var outputFileOptions: OutputFileOptions
@@ -140,20 +144,32 @@ class CameraHandler(private val context: Context) {
         for (i in 0 until amountOfPhotos) {
             Log.i(MyApplication.tagForTesting, "photo number: $i")
             outputFileOptions =
-                OutputFileOptions.Builder(fileHandler.getFileFromInternalStorage(i,internalFolderName)).build()
+                OutputFileOptions.Builder(
+                    fileHandler.getFileFromInternalStorage(
+                        i,
+                        internalFolderName
+                    )
+                ).build()
             imageCapture.takePicture(outputFileOptions, cameraExecutor,
                 object : ImageCapture.OnImageSavedCallback {
                     override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                         val uri = outputFileResults.savedUri
                         Log.i(MyApplication.tagForTesting, "onImageSaved $uri")
-                        if(i == amountOfPhotos-1){
-                            val imageManipulationRequest: WorkRequest = OneTimeWorkRequestBuilder<ImageManipulatorWorker>().setInputData(dataForWorker).build()
+                        if (i == amountOfPhotos - 1) {
+                            val imageManipulationRequest: WorkRequest =
+                                OneTimeWorkRequestBuilder<ImageManipulatorWorker>().setInputData(
+                                    dataForWorker
+                                ).build()
                             workManager.enqueue(imageManipulationRequest)
                             GlobalScope.launch(Dispatchers.Main) {
                                 workManager.getWorkInfoByIdLiveData(imageManipulationRequest.id)
                                     .observe(activity) { workInfo ->
                                         if (workInfo.state == WorkInfo.State.SUCCEEDED) {
-                                            Log.i(MyApplication.tagForTesting, "work done")
+                                            Toast.makeText(
+                                                context,
+                                                context.getString(R.string.recording_activity_toast_message),
+                                                Toast.LENGTH_SHORT
+                                            ).show()
                                         }
                                     }
                             }
@@ -168,7 +184,7 @@ class CameraHandler(private val context: Context) {
         }//for loop to take photos
     }//use camera
 
-    fun stopUsingCamera(){
+    fun stopUsingCamera() {
         cameraProvider.unbindAll() // stop using camera
     }
 }

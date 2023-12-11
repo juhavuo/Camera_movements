@@ -57,7 +57,7 @@ class ImageManipulatorWorker(c: Context, workerParameters: WorkerParameters): Wo
             var bitmap: Bitmap?
             if (files != null && files!!.isNotEmpty()) {
                 Log.i(MyApplication.tagForTesting,"need to get bitmap")
-                bitmap = fileHandler.getBitmap(files!![0])
+                bitmap = fileHandler.getBitmapAndRotate(files!![0])
                 if(bitmap != null) {
                     createEmptyBitmap(bitmap)
                     if(pixelSize == 1) {
@@ -66,7 +66,7 @@ class ImageManipulatorWorker(c: Context, workerParameters: WorkerParameters): Wo
                         addBitmapToBase(bitmap,pixelSize)
                     }
                     for (i in 1 until files!!.size) {
-                        bitmap = fileHandler.getBitmap(files!![i])
+                        bitmap = fileHandler.getBitmapAndRotate(files!![i])
                         if(bitmap != null) {
                             if(pixelSize == 1) {
                                 addBitmapToBase(bitmap)
@@ -164,36 +164,3 @@ class ImageManipulatorWorker(c: Context, workerParameters: WorkerParameters): Wo
 
 
 
-/*
-
-            var pixel2: Int
-            var pixel3: Int
-            var pixel4: Int
-
-            var pixelBM2: Int
-            var pixelBM3: Int
-            var pixelBM4: Int
-
-                   if(pixelSize < 30) {
-                       pixel = bitmapBase!!.getPixel(x, y)
-                       pixelBM = bm.getPixel(x,y)
-                       r = Color.red(pixel)+Color.red(pixelBM)/amountOfFiles
-                       g = Color.green(pixel)+Color.green(pixelBM)/amountOfFiles
-                       b = Color.blue(pixel)+Color.blue(pixelBM)/amountOfFiles
-                   }else{
-                       pixel = bitmapBase!!.getPixel(x, y)
-                       pixel2 = bitmapBase!!.getPixel(x+pixelSize-1, y)
-                       pixel3 = bitmapBase!!.getPixel(x, y+pixelSize-1)
-                       pixel4 = bitmapBase!!.getPixel(x+pixelSize-1, y+pixelSize-1)
-                       pixelBM= bm.getPixel(x,y)
-                       pixelBM2=bm.getPixel(x+pixelSize-1,y)
-                       pixelBM3=bm.getPixel(x,y+pixelSize-1)
-                       pixelBM4=bm.getPixel(x+pixelSize-1,y+pixelSize-1)
-                       Log.i(MyApplication.tagForTesting,"p1: $pixel p2: $pixel2 p3 $pixel3 p4 $pixel4")
-                       r = (Color.red(pixel)+Color.red(pixel2)+Color.red(pixel3)+Color.red(pixel4))/4
-                       +(Color.red(pixelBM)+Color.red(pixelBM2)+Color.red(pixelBM3)+Color.red(pixelBM4))/(4*amountOfFiles)
-                       g = (Color.green(pixel)+Color.green(pixel2)+Color.green(pixel3)+Color.green(pixel4))/4
-                       +(Color.green(pixelBM)+Color.green(pixelBM2)+Color.green(pixelBM3)+Color.green(pixelBM4))/(4*amountOfFiles)
-                       b = (Color.blue(pixel)+Color.blue(pixel2)+Color.blue(pixel3)+Color.blue(pixel4))/4
-                       +(Color.blue(pixelBM)+Color.blue(pixelBM2)+Color.blue(pixelBM3)+Color.blue(pixelBM4))/(4*amountOfFiles)
-                   }*/
