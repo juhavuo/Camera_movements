@@ -48,6 +48,7 @@ class CameraHandler(private val context: Context) {
     private lateinit var cameraProvider: ProcessCameraProvider
     private lateinit var cameraExecutor: Executor
     private lateinit var camera: Camera
+    private var multipliers = ""
     private var amountOfPhotos = 0
     private var pixelSize = 1
     private var outputSize = Size(720, 480)
@@ -87,6 +88,7 @@ class CameraHandler(private val context: Context) {
         val sizes = getSizes(context)
         outputSize = sizes[dataStoreHandler.getImageSizeIndex()]
         Log.i(MyApplication.tagForTesting, "get settings: $amountOfPhotos")
+        multipliers = dataStoreHandler.getMultipliers()
     }
 
     /**
@@ -137,6 +139,7 @@ class CameraHandler(private val context: Context) {
             .putString(MyApplication.fileNameTagForWorker, fileName)
             .putString(MyApplication.internalFolderNameTagForWorker, internalFolderName)
             .putInt(MyApplication.pixelSizeTagForWorker, pixelSize)
+            .putString(MyApplication.multipliersTag,multipliers)
             .build()
 
         var outputFileOptions: OutputFileOptions

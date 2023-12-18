@@ -106,6 +106,14 @@ class DataStoreHandler private constructor(val context: Context) {
         }
     }
 
+    suspend fun getMultipliers(): String{
+        val redValue = getSeekbarProgressValue(SettingsData.getSettingsData(context,R.string.for_r_values_seekbar))
+        val greenValue = getSeekbarProgressValue(SettingsData.getSettingsData(context,R.string.for_g_values_seekbar))
+        val blueValue = getSeekbarProgressValue(SettingsData.getSettingsData(context,R.string.for_b_values_seekbar))
+        return "$redValue,$greenValue,$blueValue"
+
+    }
+
     //for use in test phase if some changes is done, what is saved in datastore
     //so that no unused values is left there
     suspend fun clearDatastore(){

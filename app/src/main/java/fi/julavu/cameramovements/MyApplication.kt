@@ -12,5 +12,6 @@ class MyApplication {
         const val internalFolderNameTagForWorker = "internal_folder_name"
         const val pixelSizeTagForWorker = "pixel_size"
         const val tagForTesting = "cameramovements_testing"
+        const val multipliersTag = "multipliers"
     }
 }

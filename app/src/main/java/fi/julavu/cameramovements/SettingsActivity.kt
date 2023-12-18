@@ -56,7 +56,19 @@ class SettingsActivity : ComponentActivity() {
 
         val pixelSizeSettings =
             SettingsData.getSettingsData(this, R.string.for_pixel_size_seekbar)
-        setupSeekbar(R.id.settings_activity_pixel_size_spinner, pixelSizeSettings)
+        setupSeekbar(R.id.settings_activity_pixel_size_seekbar, pixelSizeSettings)
+
+        val redMultiplierSettings =
+            SettingsData.getSettingsData(this,R.string.for_r_values_seekbar)
+        setupSeekbar(R.id.settings_activity_r_seekbar, redMultiplierSettings)
+
+        val greenMultiplierSettings =
+            SettingsData.getSettingsData(this,R.string.for_g_values_seekbar)
+        setupSeekbar(R.id.settings_activity_g_seekbar,greenMultiplierSettings)
+
+        val blueMultiplierSettings =
+            SettingsData.getSettingsData(this,R.string.for_b_values_seekbar)
+        setupSeekbar(R.id.settings_activity_b_seekbar,blueMultiplierSettings)
 
         CoroutineScope(Dispatchers.Main).launch {
 

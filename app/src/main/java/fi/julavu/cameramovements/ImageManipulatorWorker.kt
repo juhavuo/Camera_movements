@@ -26,6 +26,7 @@ class ImageManipulatorWorker(c: Context, workerParameters: WorkerParameters): Wo
     private var amountOfFiles = 0
     private var bitmapBase: Bitmap? = null
     private var files: Array<File>? = null
+    private val multipliers: Array<Float> = arrayOf(1f,1f,1f)
 
     override fun doWork(): Result {
 
@@ -39,8 +40,18 @@ class ImageManipulatorWorker(c: Context, workerParameters: WorkerParameters): Wo
             internalFolderName = ""
         }
 
-        var pixelSize = inputData.getInt(MyApplication.pixelSizeTagForWorker,1)
+        val pixelSize = inputData.getInt(MyApplication.pixelSizeTagForWorker,1)
         Log.i(MyApplication.tagForTesting,"pixel size: $pixelSize")
+
+        val multipliersString = inputData.getString(MyApplication.multipliersTag)
+        if(!multipliersString.isNullOrEmpty()){
+            val multiplierParts = multipliersString.split(',')
+            if(multiplierParts.size == multipliers.size) {
+                for (i in multipliers.indices) {
+                    multipliers[i] = multiplierParts[i].toFloat()/100f
+                }
+            }
+        }
 
         fileHandler = FileHandler(context)
             files = fileHandler.getTemporaryPhotoFiles(internalFolderName)
@@ -117,9 +128,9 @@ class ImageManipulatorWorker(c: Context, workerParameters: WorkerParameters): Wo
                 for(y in 0 until bitmapBase!!.height){
                     pixel = bitmapBase!!.getPixel(x, y)
                     pixelBM = bm.getPixel(x,y)
-                    r = Color.red(pixel)+Color.red(pixelBM)/amountOfFiles
-                    g = Color.green(pixel)+Color.green(pixelBM)/amountOfFiles
-                    b = Color.blue(pixel)+Color.blue(pixelBM)/amountOfFiles
+                    r = Color.red(pixel)+(multipliers[0]*Color.red(pixelBM)/amountOfFiles).toInt()
+                    g = Color.green(pixel)+(multipliers[1]*Color.green(pixelBM)/amountOfFiles).toInt()
+                    b = Color.blue(pixel)+(multipliers[2]*Color.blue(pixelBM)/amountOfFiles).toInt()
 
                     bitmapBase!![x, y] = Color.rgb(r,g,b)
 
@@ -145,9 +156,9 @@ class ImageManipulatorWorker(c: Context, workerParameters: WorkerParameters): Wo
                 for(y in 0 until bitmapBase!!.height-pixelSize step pixelSize){
                     pixel = bitmapBase!!.getPixel(x, y)
                     pixelBM = bm.getPixel(x,y)
-                    r = Color.red(pixel)+Color.red(pixelBM)/amountOfFiles
-                    g = Color.green(pixel)+Color.green(pixelBM)/amountOfFiles
-                    b = Color.blue(pixel)+Color.blue(pixelBM)/amountOfFiles
+                    r = Color.red(pixel)+(multipliers[0]*Color.red(pixelBM)/amountOfFiles).toInt()
+                    g = Color.green(pixel)+(multipliers[1]*Color.green(pixelBM)/amountOfFiles).toInt()
+                    b = Color.blue(pixel)+(multipliers[2]*Color.blue(pixelBM)/amountOfFiles).toInt()
                    //not very efficient solution
                     for(i in 0 until pixelSize) {
                         for(j in 0 until pixelSize) {
